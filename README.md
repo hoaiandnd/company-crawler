@@ -186,6 +186,46 @@ export type ExportOptions = {
 > [!Important]
 > Thuộc tính `Driver._crawlRequest` sẽ tự có giá trị khi gọi `crawlAndExport()`. Các lớp driver kế thừa chỉ cần định nghĩa phương thức `run()`. Phương thức `run()` sẽ chỉ cần quan tâm đến các điều kiện lọc, nơi gọi các phương thức khác.
 
+**Ví dụ:**
+
+```ts
+export type DriverComponent = {
+  configLoader: IDriverConfigurationLoader
+  paginator: IDriverPaginator
+  fetcher: IDriverFetcher
+  crawler: IDriverCrawler
+  validator?: IDriverValidator
+  transformer?: IDriverTransformer
+}
+
+export class DriverBase extends Driver {
+  protected readonly _components: DriverComponent
+  constructor(components: DriverComponent) {
+    super()
+    this._components = components
+  }
+  protected async _run(): Promise<CrawlResult> {
+    if (!this._crawlRequest) {
+      throw new Error('NO_REQUEST_DATA')
+    }
+    const domain = getDomain(this._crawlRequest.url)
+    const { crawlLimit, selectors } = this._components.configLoader.load(domain)
+    const page = this._components.paginator.create(this._crawlRequest) // current & next & goNext
+    while (crawLimit >= 0) {
+      const companiesPageHtml = await this._components.fetcher.getHtml(page.current.url)
+      if(companiesPageHtml) {
+        const companyLinks = await this._components.crawler.crawl(selectors.companyLinks)
+        if(companyLinks?.length) {
+          // fetch all links ...
+        }
+      }
+      page.goNext()
+      crawLimit--
+    }
+  }
+}
+```
+
 ## Driver Configuration Loader
 
 Mỗi driver sẽ có một file JSON để cấu hình cho từng domain. Driver Configuration Loader sẽ có nhiệm vụ tải file JSON đó để tải những cấu hình cụ thể.
@@ -198,6 +238,8 @@ File cấu hình sẽ có các thuộc tính như sau:
   "domain": "domain.com",
   "supportedExportFormat": ["docx", "csv"],
   "crawlLimit": 10,
+  "concurrencyRequestLimit": 5,
+  "dateFormat": "YYYY-MM-DD",
   "selectors": {
     "companyLinks": "body > div > a",
     "name": "body > div.name",
@@ -228,7 +270,7 @@ Vì cấu trúc file JSON là giống nhau, Driver Configuration Loader có th�
 
 ```ts
 export interface IDriverConfigurationLoader<TJsonType> {
-  getConfigurations(domain: string): Promise<TJsonType>
+  load(domain: string): Promise<TJsonType>
 }
 ```
 
@@ -241,3 +283,19 @@ Trong đó:
 > [!Note]
 > Các lớp triển khai interface `IDriverConfigurationLoader` có thể sử dụng thêm các công cụ kiểm tra JSON (ở đây sử dụng [`zod`](https://www.npmjs.com/package/zod)).
 
+Gợi ý schema khi sử dụng `zod`:
+
+```ts
+import z from 'zod'
+
+export const DriverConfigCompanyDetailSchema = z.object({
+  name: z.string().optional(),
+  founder: z.string().optional(),
+  taxCode: z.string().optional(),
+  phone: z.string().length(10),
+  address: z.string().optional(),
+  startDate: z.string().optional(),
+  email: z.string().optional(),
+  major: z.string().optional()
+})
+```
