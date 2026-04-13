@@ -204,24 +204,11 @@ export class DriverBase extends Driver {
     super()
     this._components = components
   }
-  protected async _run(): Promise<CrawlResult> {
+  protected _run(exportOptions?: ExportOptions): CrawlResult | Promise<CrawlResult> {
     if (!this._crawlRequest) {
       throw new Error('NO_REQUEST_DATA')
     }
-    const domain = getDomain(this._crawlRequest.url)
-    const { crawlLimit, selectors } = this._components.configLoader.load(domain)
-    const page = this._components.paginator.create(this._crawlRequest) // current & next & goNext
-    while (crawLimit >= 0) {
-      const companiesPageHtml = await this._components.fetcher.getHtml(page.current.url)
-      if(companiesPageHtml) {
-        const companyLinks = await this._components.crawler.crawl(selectors.companyLinks)
-        if(companyLinks?.length) {
-          // fetch all links ...
-        }
-      }
-      page.goNext()
-      crawLimit--
-    }
+    // sử dụng các thành phần đề tạo thành một chức năng hoàn chỉnh
   }
 }
 ```
@@ -236,7 +223,7 @@ File cấu hình sẽ có các thuộc tính như sau:
 {
   "name": "Page name",
   "domain": "domain.com",
-  "supportedExportFormat": ["docx", "csv"],
+  "supportedExportFormats": ["docx", "csv"],
   "crawlLimit": 10,
   "concurrencyRequestLimit": 5,
   "dateFormat": "YYYY-MM-DD",
@@ -283,19 +270,16 @@ Trong đó:
 > [!Note]
 > Các lớp triển khai interface `IDriverConfigurationLoader` có thể sử dụng thêm các công cụ kiểm tra JSON (ở đây sử dụng [`zod`](https://www.npmjs.com/package/zod)).
 
-Gợi ý schema khi sử dụng `zod`:
+Bảng mô tả file JSON cấu hình cho driver:
 
-```ts
-import z from 'zod'
-
-export const DriverConfigCompanyDetailSchema = z.object({
-  name: z.string().optional(),
-  founder: z.string().optional(),
-  taxCode: z.string().optional(),
-  phone: z.string().length(10),
-  address: z.string().optional(),
-  startDate: z.string().optional(),
-  email: z.string().optional(),
-  major: z.string().optional()
-})
-```
+Thuộc tính | Kiểu dữ liêu | Mô tả | Giá trị mặc định
+--- | --- | --- | ---
+`name` | `string` | Tên của driver. Thường là tên trang web tương ứng với tên miền. Dùng cho các mục đích hiển thị. | `''` (Chuỗi rỗng)
+`domain` | `string` | Tên miền của trang website mà driver được định nghĩa để cào. | **Required**
+`supportedExportFormat` | `string[]` | Định dạng mà driver hiện tại hỗ trợ | `[]`
+`crawlLimit` | `number` | Giới hạn cào của driver. Nếu không có điều kiện dừng nào, giá trị này sẽ được sử dụng rồi. | `10`
+`concurrencyRequestLimit` | `number` | Giới hạn số request được chạy đồng thời | `undefined`
+`dateFormat` | `number \| string` | Định dạng ngày giờ mà driver xử lý. | `'YYYY-MM-DD'` (nếu là `string`)
+`selectors` | `Record<string, string>` | CSS Selector để tìm đến các thành phần cần cào. | `{}`
+`blackList` | `Array<{ [key: string]: Rule }>`
+ 
