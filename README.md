@@ -35,7 +35,7 @@ app.post(async (req, res, next) => {
   const requestHandler = new RequestHandler(req)
   const result = await requestHandler.validate()
   if (!result.isValid) {
-    throw new Error('INVALID_REQUEST')
+    throw new Error('ERR_INVALID_REQUEST')
     return
   }
   const request = result.transform()
@@ -95,7 +95,7 @@ Sử dụng:
 ```ts
 const driver = DriverLoader.load('domain')
 if (!driver) {
-  throw new Error('UNSUPPORTED_DOMAIN')
+  throw new Error('ERR_UNSUPPORTED_DOMAIN')
 }
 // code ...
 ```
@@ -124,7 +124,7 @@ app.post(async (req, res, next) => {
   const requestHandler = new RequestHandler(req)
   const result = await requestHandler.validate()
   if (!result.isValid) {
-    throw new Error('INVALID_REQUEST')
+    throw new Error('ERR_INVALID_REQUEST')
     return
   }
   const crawlRequest = result.transform()
@@ -132,7 +132,7 @@ app.post(async (req, res, next) => {
   const domain = getDomain(crawlRequest.url)
   const driver = DriverLoader.load(domain)
   if (!driver) {
-    throw new Error('UNSUPPORTED_DOMAIN')
+    throw new Error('ERR_UNSUPPORTED_DOMAIN')
     return
   }
   const crawlResult = await driver.crawlAndExport(crawlRequest)
@@ -168,6 +168,9 @@ export abstract class Driver {
   }
   protected abstract _run(exportOptions?: ExportOptions): CrawlResult | Promise<CrawlResult>
   public crawlAndExport(crawlRequest: CrawlRequest, exportOptions?: ExportOptions) {
+    if (!crawlRequest) {
+      throw new Error('ERR_NO_REQUEST_DATA')
+    }
     this._crawlRequest = crawlRequest
     return this._run(exportOptions)
   }
@@ -205,9 +208,6 @@ export class DriverBase extends Driver {
     this._components = components
   }
   protected _run(exportOptions?: ExportOptions): CrawlResult | Promise<CrawlResult> {
-    if (!this._crawlRequest) {
-      throw new Error('NO_REQUEST_DATA')
-    }
     // sử dụng các thành phần đề tạo thành một chức năng hoàn chỉnh
   }
 }
@@ -229,14 +229,16 @@ File cấu hình sẽ có các thuộc tính như sau:
   "dateFormat": "YYYY-MM-DD",
   "selectors": {
     "companyLinks": "body > div > a",
-    "name": "body > div.name",
-    "phone": "body > div.phone",
-    "taxCode": "body > div.taxCode",
-    "address": "body > div.address",
-    "founder": "body > div.founder",
-    "startDate": "body > div.startDate",
-    "email": "body > div.email",
-    "major": "body > div.major"
+    "companyDetail": {
+      "name": "body > div.name",
+      "phone": "body > div.phone",
+      "taxCode": "body > div.taxCode",
+      "address": "body > div.address",
+      "founder": "body > div.founder",
+      "startDate": "body > div.startDate",
+      "email": "body > div.email",
+      "primaryBusiness": "body > div.primary-business"
+    }
   },
   "blackList": {
     "name": {
@@ -272,14 +274,58 @@ Trong đó:
 
 Bảng mô tả file JSON cấu hình cho driver:
 
-Thuộc tính | Kiểu dữ liêu | Mô tả | Giá trị mặc định
---- | --- | --- | ---
-`name` | `string` | Tên của driver. Thường là tên trang web tương ứng với tên miền. Dùng cho các mục đích hiển thị. | `''` (Chuỗi rỗng)
-`domain` | `string` | Tên miền của trang website mà driver được định nghĩa để cào. | **Required**
-`supportedExportFormat` | `string[]` | Định dạng mà driver hiện tại hỗ trợ | `[]`
-`crawlLimit` | `number` | Giới hạn cào của driver. Nếu không có điều kiện dừng nào, giá trị này sẽ được sử dụng rồi. | `10`
-`concurrencyRequestLimit` | `number` | Giới hạn số request được chạy đồng thời | `undefined`
-`dateFormat` | `number \| string` | Định dạng ngày giờ mà driver xử lý. | `'YYYY-MM-DD'` (nếu là `string`)
-`selectors` | `Record<string, string>` | CSS Selector để tìm đến các thành phần cần cào. | `{}`
-`blackList` | `Array<{ [key: string]: Rule }>`
- 
+| Thuộc tính                | Kiểu dữ liêu             | Mô tả                                                                                           | Giá trị mặc định                 |
+| ------------------------- | ------------------------ | ----------------------------------------------------------------------------------------------- | -------------------------------- |
+| `name`                    | `string`                 | Tên của driver. Thường là tên trang web tương ứng với tên miền. Dùng cho các mục đích hiển thị. | `''` (Chuỗi rỗng)                |
+| `domain`                  | `string`                 | Tên miền của trang website mà driver được định nghĩa để cào.                                    | **Required**                     |
+| `supportedExportFormat`   | `string[]`               | Định dạng mà driver hiện tại hỗ trợ                                                             | `[]`                             |
+| `crawlLimit`              | `number`                 | Giới hạn cào của driver. Nếu không có điều kiện dừng nào, giá trị này sẽ được sử dụng rồi.      | `10`                             |
+| `concurrencyRequestLimit` | `number`                 | Giới hạn số request được chạy đồng thời                                                         | `undefined`                      |
+| `dateFormat`              | `string`       | Định dạng ngày giờ mà driver xử lý.                                                             | `'YYYY-MM-DD'` |
+| `selectors`               | `Record<string, string>` | CSS Selector để tìm đến các thành phần cần cào.                                                 | `{}`                             |
+| `blackList`               | `Array<BlackListItem>` | Danh sách đen. Quy định bởi các thuộc tính `rules`, `validateType` và `ignoreCase`.             | `undefined`                      |
+
+Ta sẽ sử dụng `zod` để kiểm tra file JSON cấu hình có hợp lệ hay không.
+
+```ts
+import z from 'zod'
+
+export const CompanyDetailSchema = z.object({
+  name: z.string().optional(),
+  founder: z.string().optional(),
+  taxCode: z.string().optional(),
+  phone: z.string().length(10),
+  address: z.string().optional(),
+  startDate: z.string().optional(),
+  email: z.string().email().optional(),
+  primaryBusiness: z.string().optional()
+})
+
+export const SelectorSchema = z.object({
+  companyLinks: z.string(),
+  companyDetail: CompanyDetailSchema
+})
+
+export const RuleSchema = z.object({
+  rules: z.array(z.string()),
+  validateType: z.enum(['includes', 'startsWith', 'endsWith']),
+  ignoreCase: z.boolean().optional().default(false)
+})
+
+export const BlackListSchema = z.record(
+  CompanyDetailSchema.keyof(),
+  DriverConfigRuleSchema.optional()
+)
+
+export const DriverConfigSchema = z.object({
+  name: z.string().optional().default(''),
+  domain: z.string(),
+  dateFormat: z.string().default('YYYY-MM-DD'),
+  supportedExportFormats: z.array(z.string()),
+  selectors: DriverConfigSelectorSchema,
+  blackList: DriverConfigBlackListSchema.optional(),
+  crawlLimit: z.number().int().positive().default(10),
+  concurrencyRequestLimit: z.number().int().positive().default(5)
+})
+```
+
