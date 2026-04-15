@@ -316,17 +316,17 @@ export const RuleSchema = z.object({
   ignoreCase: z.boolean().optional().default(false)
 })
 
-export const BlackListSchema = z.record(CompanyDetailSchema.keyof(), DriverConfigRuleSchema.optional())
+export const BlackListSchema = z.record(CompanyDetailSchema.keyof(), RuleSchema.optional())
 
 export const DriverConfigSchema = z.object({
   name: z.string().optional().default(''),
   domain: z.string(),
   dateFormat: z.string().default('YYYY-MM-DD'),
   supportedExportFormats: z.array(z.string()),
-  selectors: DriverConfigSelectorSchema,
-  blackList: DriverConfigBlackListSchema.optional(),
   crawlLimit: z.number().int().positive().default(10),
-  concurrencyRequestLimit: z.number().int().positive().default(5)
+  concurrencyRequestLimit: z.number().int().positive().default(5),
+  selectors: SelectorSchema.optional(),
+  blackList: BlackListSchema.optional()
 })
 ```
 
