@@ -196,18 +196,18 @@ export type ExportOptions = {
 **Ví dụ:**
 
 ```ts
-export type DriverComponent = {
+export type DriverComponent<TCrawlData, TTransformedData> = {
   configLoader: IDriverConfigurationLoader
   paginator: IDriverPaginator
   fetcher: IDriverFetcher
-  crawler: IDriverCrawler
-  validator?: IDriverValidator
-  transformer?: IDriverTransformer
+  crawler: IDriverCrawler<TCrawlData>
+  validator?: IDriverValidator<TCrawlData>
+  transformer?: IDriverTransformer<TCrawlData, TTransformedData>
 }
 
-export class DriverBase extends Driver {
-  protected readonly _components: DriverComponent
-  constructor(components: DriverComponent) {
+export class DriverBase<TCrawlData extends { phone: number }, TTransformedData = TCrawlData> extends Driver {
+  protected readonly _components: DriverComponent<TCrawlData, TTransformedData>
+  constructor(components: DriverComponent<TCrawlData, TTransformedData>) {
     super()
     this._components = components
   }
@@ -360,10 +360,11 @@ export interface IDriverPaginator {
 > Phương thức `goNext()` sẽ thực hiện tính toán thay đổi giá trị của thuộc tính `current` và `next`. Hãy gọi nó một cách có chủ ý và thường là cuối thao tác duyệt trang và di chuyển sang trang mới.
 >
 > **Ví dụ:**
+>
 > ```ts
 > let { crawlLimit } = this._context.driverConfig
 > const paginator = this._component.paginator.paginate(this._context.crawlRequest)
-> while(crawlLimit) {
+> while (crawlLimit) {
 >   const { url } = paginator.current
 >   this._component.fetcher.fetch(url)
 >   // xử lý ...
@@ -377,19 +378,66 @@ export interface IDriverPaginator {
 Driver Fetcher có nhiệm vụ cung cấp một phương thức có thể lấy dữ liệu từ một đường dẫn cụ thể - thường lấy từ `PaginationResult.current.url`.
 
 Kết quả fetch được có thể chia làm 2 loại:
+
 - HTML
 - JSON
 
 > [!Note]
-> Mặc dù các trường hợp cào dữ liệu sẽ trả về dạng HTML, nhưng vẫn phải triển khai thêm dữ liệu dạng JSON, nhằm mục đích mở rộng. 
+> Mặc dù các trường hợp cào dữ liệu sẽ trả về dạng HTML, nhưng vẫn phải triển khai thêm dữ liệu dạng JSON, nhằm mục đích mở rộng.
 
 > [!Warning]
-> Để đồng bộ tiến đến Driver Crawler, nếu dữ liệu trả về là **JSON**, hãy chuyển nó về **dạng chuỗi**.
+> Để đồng bộ tiến đến Driver Crawler, nếu dữ liệu trả về là **JSON**, hãy chuyển nó về **dạng chuỗi** với `JSON.stringify()`.
 
 Interface `IDriverFetcher` đại diện cho thao tác lấy dữ liệu từ đường dẫn:
 
 ```ts
 export interface IDriverFetcher {
   fetch(url: string): string | Promise<string>
+}
+```
+
+## Driver Crawler
+
+Driver Crawler có nhiệm vụ từ chuỗi (HTML hoặc JSON), chuyển đổi về kiểu đối tượng định sẵn sử dụng được trong JavaScript.
+
+Với dạng HTML, ở đây sử dụng [**Cheerio**](https://www.npmjs.com/package/cheerio) để lấy dữ liệu từ các selector định sẵn trong file cấu hình driver.
+
+```ts
+import * as cheerio from 'cheerio'
+
+const $ = cheerio.load('<h2 class="title">Hello world</h2>')
+const text = $('.title').first().text() // Hello world
+```
+
+Interface `IDriverCrawler` sẽ có dạng như sau:
+
+```ts
+export interface IDriverCrawler<T extends { phone: number }> {
+  // cào các link đến các trang chi tiết
+  crawlLinks(html: string): string[] | Promise<string[]>
+  // cào thông tin chi tiết
+  crawl(html: string): T | Promise<T>
+}
+```
+
+## Driver Validator
+
+Driver Validator dùng để kiểm tra xem một thông tin cào được có hợp lệ hay không dựa trên `CrawlRequest.filter` và thuộc tính `DriverConfig.blackList`.
+
+Interface `IDriverValidator` sẽ có dạng như sau:
+
+```ts
+export interface IDriverValidator<T> {
+  validate(context: DriverContext, data: T): boolean | Promise<boolean>
+}
+```
+
+## Driver Transformer
+
+Driver Transformer dùng để biến đổi (transform) đối tượng cào được `TCrawlData` thành `TTransformedData`:
+
+```ts
+export interface IDriverTransformer<TCrawlData, TTransformedData = TCrawlData> {
+  transform(data: TCrawlData): TTransformedData | Promise<TTransformedData>
 }
 ```
