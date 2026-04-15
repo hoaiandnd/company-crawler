@@ -412,7 +412,7 @@ const text = $('.title').first().text() // Hello world
 Interface `IDriverCrawler` sẽ có dạng như sau:
 
 ```ts
-export interface IDriverCrawler<T extends { phone: number }> {
+export interface IDriverCrawler<T> {
   // cào các link đến các trang chi tiết
   crawlLinks(html: string): string[] | Promise<string[]>
   // cào thông tin chi tiết
