@@ -161,17 +161,21 @@ export type CrawlResult = (SuccessCrawlResult | FailedCrawlResult) & {
 Lớp `Driver` là lớp cơ sở trừu tượng cho các driver cụ thể.
 
 ```ts
+export type DriverContext = {
+  crawlRequest?: CrawlRequest
+  driverConfig?: DriverConfig // xem mục # Driver Configuration Loader
+}
 export abstract class Driver {
-  protected _crawlRequest?: CrawlRequest
+  protected _context?: DriverContext
   construction() {
-    this._crawlRequest = undefined
+    this._context = undefined
   }
   protected abstract _run(exportOptions?: ExportOptions): CrawlResult | Promise<CrawlResult>
   public crawlAndExport(crawlRequest: CrawlRequest, exportOptions?: ExportOptions) {
     if (!crawlRequest) {
       throw new Error('ERR_NO_REQUEST_DATA')
     }
-    this._crawlRequest = crawlRequest
+    this._context = { crawlRequest }
     return this._run(exportOptions)
   }
 }
@@ -187,7 +191,7 @@ export type ExportOptions = {
 ```
 
 > [!Important]
-> Thuộc tính `Driver._crawlRequest` sẽ tự có giá trị khi gọi `crawlAndExport()`. Các lớp driver kế thừa chỉ cần định nghĩa phương thức `run()`. Phương thức `run()` sẽ chỉ cần quan tâm đến các điều kiện lọc, nơi gọi các phương thức khác.
+> Thuộc tính `Driver._context.crawlRequest` sẽ tự có giá trị khi gọi `crawlAndExport()`. Các lớp driver kế thừa chỉ cần định nghĩa phương thức `run()`. Phương thức `run()` sẽ chỉ cần quan tâm đến các điều kiện lọc, nơi gọi các phương thức khác.
 
 **Ví dụ:**
 
@@ -274,16 +278,16 @@ Trong đó:
 
 Bảng mô tả file JSON cấu hình cho driver:
 
-| Thuộc tính                | Kiểu dữ liêu             | Mô tả                                                                                           | Giá trị mặc định                 |
-| ------------------------- | ------------------------ | ----------------------------------------------------------------------------------------------- | -------------------------------- |
-| `name`                    | `string`                 | Tên của driver. Thường là tên trang web tương ứng với tên miền. Dùng cho các mục đích hiển thị. | `''` (Chuỗi rỗng)                |
-| `domain`                  | `string`                 | Tên miền của trang website mà driver được định nghĩa để cào.                                    | **Required**                     |
-| `supportedExportFormat`   | `string[]`               | Định dạng mà driver hiện tại hỗ trợ                                                             | `[]`                             |
-| `crawlLimit`              | `number`                 | Giới hạn cào của driver. Nếu không có điều kiện dừng nào, giá trị này sẽ được sử dụng rồi.      | `10`                             |
-| `concurrencyRequestLimit` | `number`                 | Giới hạn số request được chạy đồng thời                                                         | `undefined`                      |
-| `dateFormat`              | `string`       | Định dạng ngày giờ mà driver xử lý.                                                             | `'YYYY-MM-DD'` |
-| `selectors`               | `Record<string, string>` | CSS Selector để tìm đến các thành phần cần cào.                                                 | `{}`                             |
-| `blackList`               | `Array<BlackListItem>` | Danh sách đen. Quy định bởi các thuộc tính `rules`, `validateType` và `ignoreCase`.             | `undefined`                      |
+| Thuộc tính                | Kiểu dữ liêu             | Mô tả                                                                                           | Giá trị mặc định  |
+| ------------------------- | ------------------------ | ----------------------------------------------------------------------------------------------- | ----------------- |
+| `name`                    | `string`                 | Tên của driver. Thường là tên trang web tương ứng với tên miền. Dùng cho các mục đích hiển thị. | `''` (Chuỗi rỗng) |
+| `domain`                  | `string`                 | Tên miền của trang website mà driver được định nghĩa để cào.                                    | **Required**      |
+| `supportedExportFormat`   | `string[]`               | Định dạng mà driver hiện tại hỗ trợ                                                             | `[]`              |
+| `crawlLimit`              | `number`                 | Giới hạn cào của driver. Nếu không có điều kiện dừng nào, giá trị này sẽ được sử dụng rồi.      | `10`              |
+| `concurrencyRequestLimit` | `number`                 | Giới hạn số request được chạy đồng thời                                                         | `undefined`       |
+| `dateFormat`              | `string`                 | Định dạng ngày giờ mà driver xử lý.                                                             | `'YYYY-MM-DD'`    |
+| `selectors`               | `Record<string, string>` | CSS Selector để tìm đến các thành phần cần cào.                                                 | `{}`              |
+| `blackList`               | `Array<BlackListItem>`   | Danh sách đen. Quy định bởi các thuộc tính `rules`, `validateType` và `ignoreCase`.             | `undefined`       |
 
 Ta sẽ sử dụng `zod` để kiểm tra file JSON cấu hình có hợp lệ hay không.
 
@@ -312,10 +316,7 @@ export const RuleSchema = z.object({
   ignoreCase: z.boolean().optional().default(false)
 })
 
-export const BlackListSchema = z.record(
-  CompanyDetailSchema.keyof(),
-  DriverConfigRuleSchema.optional()
-)
+export const BlackListSchema = z.record(CompanyDetailSchema.keyof(), DriverConfigRuleSchema.optional())
 
 export const DriverConfigSchema = z.object({
   name: z.string().optional().default(''),
@@ -329,3 +330,66 @@ export const DriverConfigSchema = z.object({
 })
 ```
 
+## Driver Paginator
+
+Request nhận vào đối tượng kiểu `CrawlRequest` có thuộc tính `url` và `filter.page.from` và `filter.page.to`.
+
+Driver Paginator dùng để chỉ ra cách chuyển trang khi biết được trang hiện tại. Kết quả trả về kiểu `PaginationResult`:
+
+```ts
+export type PaginationInfo = {
+  url: string // url đến trang được chỉ định - có thể sử dụng ngay
+  page: number // chỉ số trang được xét - đồng bộ với `url`
+}
+export type PaginationResult = {
+  current: PaginationInfo // trang hiện tại - dùng trực tiếp để fetch
+  next: PaginationInfo // trang tiếp theo - dùng khi kết thúc fetch
+  goNext: () => void | Promise<void> // thay đổi `current` và `next` của object hiện tại
+}
+```
+
+Interface `IDriverPaginator` có mẫu như sau:
+
+```ts
+export interface IDriverPaginator {
+  paginate(context: DriverContext): PaginationResult | Promise<PaginationResult>
+}
+```
+
+> [!Warning]
+> Phương thức `goNext()` sẽ thực hiện tính toán thay đổi giá trị của thuộc tính `current` và `next`. Hãy gọi nó một cách có chủ ý và thường là cuối thao tác duyệt trang và di chuyển sang trang mới.
+>
+> **Ví dụ:**
+> ```ts
+> let { crawlLimit } = this._context.driverConfig
+> const paginator = this._component.paginator.paginate(this._context.crawlRequest)
+> while(crawlLimit) {
+>   const { url } = paginator.current
+>   this._component.fetcher.fetch(url)
+>   // xử lý ...
+>   paginator.goNext() // gọi cuối cùng xử lý trang mới
+>   crawlLimit--
+> }
+> ```
+
+## Driver Fetcher
+
+Driver Fetcher có nhiệm vụ cung cấp một phương thức có thể lấy dữ liệu từ một đường dẫn cụ thể - thường lấy từ `PaginationResult.current.url`.
+
+Kết quả fetch được có thể chia làm 2 loại:
+- HTML
+- JSON
+
+> [!Note]
+> Mặc dù các trường hợp cào dữ liệu sẽ trả về dạng HTML, nhưng vẫn phải triển khai thêm dữ liệu dạng JSON, nhằm mục đích mở rộng. 
+
+> [!Warning]
+> Để đồng bộ tiến đến Driver Crawler, nếu dữ liệu trả về là **JSON**, hãy chuyển nó về **dạng chuỗi**.
+
+Interface `IDriverFetcher` đại diện cho thao tác lấy dữ liệu từ đường dẫn:
+
+```ts
+export interface IDriverFetcher {
+  fetch(url: string): string | Promise<string>
+}
+```
