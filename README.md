@@ -362,11 +362,11 @@ export interface IDriverPaginator {
 > **Ví dụ:**
 >
 > ```ts
-> let { crawlLimit } = this._context.driverConfig
+> let { crawlLimit } = this._context.driverConfig ?? DEFAULT_CRAWL_LIMIT
 > const paginator = this._component.paginator.paginate(this._context.crawlRequest)
 > while (crawlLimit) {
 >   const { url } = paginator.current
->   this._component.fetcher.fetch(url)
+>   const html = await this._component.fetcher.fetch(url)
 >   // xử lý ...
 >   paginator.goNext() // gọi cuối cùng xử lý trang mới
 >   crawlLimit--
