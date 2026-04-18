@@ -24,7 +24,7 @@ Mỗi driver sẽ bao gồm:
 - `DriverFetcher`: chứa các logic chính trong việc cào dữ liệu. Bao gồm cào các đường dẫn ở trang tổng, và cào trên từng trang chi tiết.
 - `DriverCrawler`: xác định dữ liệu từ đoạn HTML/JSON cào được từ `DriverFetcher`.
 - `DriverValidator`: xác định dữ liệu lấy được có thõa mãn các điều kiện lọc từ request hoặc blacklist hay không, lọc ra.
-- `DriverTransformer`: chỉ ra dữ liệu sẽ được chuyển đổi như thế nào làm output.
+- `DriverExporter`: chỉ ra cách export dữ liệu cào được. Ở bước này cho phép thay đổi dữ liệu sẽ export.
 
 ## Request handler
 
@@ -120,7 +120,7 @@ export class DriverLoader {
 Lớp `Driver` là lớp cơ sở (lớp cha) cho các lớp driver cụ thể. Lớp cơ sở này cung cấp duy nhất một phương thức ra ngoài là phương thức `crawlAndExport()` với cách sử dụng sau:
 
 ```ts
-app.post(async (req, res, next) => {
+app.post(async (req, res) => {
   const requestHandler = new RequestHandler(req)
   const result = await requestHandler.validate()
   if (!result.isValid) {
@@ -202,7 +202,8 @@ export type DriverComponent<TCrawlData, TTransformedData> = {
   fetcher: IDriverFetcher
   crawler: IDriverCrawler<TCrawlData>
   validator?: IDriverValidator<TCrawlData>
-  transformer?: IDriverTransformer<TCrawlData, TTransformedData>
+  limiter: IDriverLimiter<TCrawData>
+  exporter: IDriverExporter<TCrawlData, TTransformedData>
 }
 
 export class DriverBase<TCrawlData extends { phone: number }, TTransformedData = TCrawlData> extends Driver {
@@ -211,8 +212,36 @@ export class DriverBase<TCrawlData extends { phone: number }, TTransformedData =
     super()
     this._components = components
   }
-  protected _run(exportOptions?: ExportOptions): CrawlResult | Promise<CrawlResult> {
+  protected async _run(exportOptions?: ExportOptions): Promise<CrawlResult> {
     // sử dụng các thành phần đề tạo thành một chức năng hoàn chỉnh
+    const { url } = this._context.crawlRequest
+    const crawlDomain = getDomain(url)
+    // load and save driver configurations
+    this._context.driverConfig = await this._components.configLoader.load(crawlDomain)
+    const DEFAULT_CRAWL_LIMIT = 10
+    let { crawlLimit } = this._context.driverConfig.crawlLimit ?? DEFAULT_CRAWL_LIMIT
+    const paginator = this._component.paginator.paginate(this._context.crawlRequest)
+
+    const crawlTask = async (url: string, config: DriverConfig) => {
+      const html = await this._components.fetcher.fetch(url)
+      const companyDetail = await this._components.crawler.crawl(html, config)
+      const isValid = await this._components.validator.validate(companyDetail)
+      return isValid ? companyDetail : null
+    }
+
+    while (crawlLimit >= 0) {
+      await waitRandom()
+
+      const html = await this._components.fetcher.fetch(paginator.current.url)
+      const companyLinks = await this._components.crawler.crawlLinks(html, this._context.driverConfig.selector.companyLink)
+
+      const limiter = pLimit(crawlLimit)
+      const fetchQueue = companyLinks.map(link => limiter(_ => crawlTask(link, this._context.driverConfig)))
+      const companies = await Promise.all(fetchQueue)
+      // go next step
+      paginator.goNext()
+      crawlLimit--
+    }
   }
 }
 ```
@@ -414,21 +443,31 @@ Interface `IDriverCrawler` sẽ có dạng như sau:
 ```ts
 export interface IDriverCrawler<T> {
   // cào các link đến các trang chi tiết
-  crawlLinks(html: string): string[] | Promise<string[]>
+  crawlLinks(html: string, selector: string): string[] | Promise<string[]>
   // cào thông tin chi tiết
-  crawl(html: string): T | Promise<T>
+  crawl(html: string, config: DriverConfig): T | Promise<T>
 }
 ```
 
 ## Driver Validator
 
-Driver Validator dùng để kiểm tra xem một thông tin cào được có hợp lệ hay không dựa trên `CrawlRequest.filter` và thuộc tính `DriverConfig.blackList`.
+Driver Validator dùng để kiểm tra xem một thông tin cào được có hợp lệ hay không dựa trên `CrawlRequest.filters` và thuộc tính `DriverConfig.blackList`.
 
 Interface `IDriverValidator` sẽ có dạng như sau:
 
 ```ts
 export interface IDriverValidator<T> {
   validate(context: DriverContext, data: T): boolean | Promise<boolean>
+}
+```
+
+## Driver Limiter
+
+Driver Limiter dùng để  đặt hàng chờ cho các request đến trang cần cào đại diện bởi interface `IDriverLimiter`:
+
+```ts
+export interface IDriverLimiter<T> {
+  getLimiter(context: DriverContext): T[] | Promise<T[]>
 }
 ```
 
