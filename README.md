@@ -202,7 +202,6 @@ export type DriverComponent<TCrawlData, TTransformedData> = {
   fetcher: IDriverFetcher
   crawler: IDriverCrawler<TCrawlData>
   validator?: IDriverValidator<TCrawlData>
-  limiter: IDriverLimiter<TCrawData>
   exporter: IDriverExporter<TCrawlData, TTransformedData>
 }
 
@@ -212,33 +211,40 @@ export class DriverBase<TCrawlData extends { phone: number }, TTransformedData =
     super()
     this._components = components
   }
+  protected _setFetchQueue(companyLinks: string[]) {
+    const limiter = pLimit(this._context.driverConfig.crawlLimit)
+    const fetchQueue = companyLinks.map(url =>
+      limiter(async _ => {
+        const html = await this._components.fetcher.fetch(url)
+        const companyDetail = await this._components.crawler.crawl(html, config)
+        const isValid = await this._components.validator?.validate(companyDetail)
+        return isValid ? companyDetail : null
+      })
+    )
+    return Promise.all(fetchQueue)
+  }
   protected async _run(exportOptions?: ExportOptions): Promise<CrawlResult> {
     // sử dụng các thành phần đề tạo thành một chức năng hoàn chỉnh
+    const { configLoader, paginator, fetcher, crawler, exporter } = this._components
     const { url } = this._context.crawlRequest
     const crawlDomain = getDomain(url)
     // load and save driver configurations
-    this._context.driverConfig = await this._components.configLoader.load(crawlDomain)
-    const DEFAULT_CRAWL_LIMIT = 10
-    let { crawlLimit } = this._context.driverConfig.crawlLimit ?? DEFAULT_CRAWL_LIMIT
-    const paginator = this._component.paginator.paginate(this._context.crawlRequest)
-
-    const crawlTask = async (url: string, config: DriverConfig) => {
-      const html = await this._components.fetcher.fetch(url)
-      const companyDetail = await this._components.crawler.crawl(html, config)
-      const isValid = await this._components.validator.validate(companyDetail)
-      return isValid ? companyDetail : null
-    }
+    this._context.driverConfig = await configLoader.load(crawlDomain)
+    let { crawlLimit } = this._context.driverConfig
+    const paginator = paginator.paginate(this._context.crawlRequest)
 
     while (crawlLimit >= 0) {
       await waitRandom()
 
-      const html = await this._components.fetcher.fetch(paginator.current.url)
-      const companyLinks = await this._components.crawler.crawlLinks(html, this._context.driverConfig.selector.companyLink)
+      const html = await fetcher.fetch(paginator.current.url)
+      const companyLinks = await crawler.crawlLinks(html, this._context.driverConfig.selector.companyLink)
 
-      const limiter = pLimit(crawlLimit)
-      const fetchQueue = companyLinks.map(link => limiter(_ => crawlTask(link, this._context.driverConfig)))
-      const companies = await Promise.all(fetchQueue)
-      // go next step
+      const companies = await this._setFetchQueue(companyLinks)
+
+      //  transform `companies` before exporting ...
+
+      const exportResult = await exporter.export(companies, this._context.driverConfig, exportOptions)
+
       paginator.goNext()
       crawlLimit--
     }
@@ -458,16 +464,6 @@ Interface `IDriverValidator` sẽ có dạng như sau:
 ```ts
 export interface IDriverValidator<T> {
   validate(context: DriverContext, data: T): boolean | Promise<boolean>
-}
-```
-
-## Driver Limiter
-
-Driver Limiter dùng để  đặt hàng chờ cho các request đến trang cần cào đại diện bởi interface `IDriverLimiter`:
-
-```ts
-export interface IDriverLimiter<T> {
-  getLimiter(context: DriverContext): T[] | Promise<T[]>
 }
 ```
 
