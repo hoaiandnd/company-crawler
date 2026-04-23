@@ -196,18 +196,17 @@ export type ExportOptions = {
 **Ví dụ:**
 
 ```ts
-export type DriverComponent<TCrawlData, TTransformedData> = {
+export type DriverComponent<TCrawlData, TFetchOptions> = {
   configLoader: IDriverConfigurationLoader
   paginator: IDriverPaginator
-  fetcher: IDriverFetcher
+  fetcher: IDriverFetcher<TFetchOptions>
   crawler: IDriverCrawler<TCrawlData>
   validator?: IDriverValidator<TCrawlData>
-  exporter: IDriverExporter<TCrawlData, TTransformedData>
 }
 
-export class DriverBase<TCrawlData extends { phone: number }, TTransformedData = TCrawlData> extends Driver {
-  protected readonly _components: DriverComponent<TCrawlData, TTransformedData>
-  constructor(components: DriverComponent<TCrawlData, TTransformedData>) {
+export class DriverBase<TCrawlData extends { phone: number }, TFetchOptions = RequestInit> extends Driver {
+  protected readonly _components: DriverComponent<TCrawlData, TFetchOptions>
+  constructor(components: DriverComponent<TCrawlData, TFetchOptions>) {
     super()
     this._components = components
   }
@@ -226,11 +225,11 @@ export class DriverBase<TCrawlData extends { phone: number }, TTransformedData =
   protected async _run(exportOptions?: ExportOptions): Promise<CrawlResult> {
     // sử dụng các thành phần đề tạo thành một chức năng hoàn chỉnh
     const { configLoader, paginator, fetcher, crawler, exporter } = this._components
-    const { url } = this._context.crawlRequest
+    const { url, filters { limit } } = this._context.crawlRequest
     const crawlDomain = getDomain(url)
     // load and save driver configurations
     this._context.driverConfig = await configLoader.load(crawlDomain)
-    let { crawlLimit } = this._context.driverConfig
+    let crawlLimit = (limit && limit > 0) ? limit : this._context.driverConfig.crawlLimit
     const paginator = paginator.paginate(this._context.crawlRequest)
 
     while (crawlLimit >= 0) {
@@ -242,8 +241,6 @@ export class DriverBase<TCrawlData extends { phone: number }, TTransformedData =
       const companies = await this._setFetchQueue(companyLinks)
 
       //  transform `companies` before exporting ...
-
-      const exportResult = await exporter.export(companies, this._context.driverConfig, exportOptions)
 
       paginator.goNext()
       crawlLimit--
@@ -365,6 +362,9 @@ export const DriverConfigSchema = z.object({
 })
 ```
 
+> [!Important]
+> Driver Configuration Loader phải có nhiệm vụ đảm bảo các giá trị cho **tất cả** thuộc tính cấu hình. Nếu không có giá trị, hãy khởi tạo nó với giá trị mặc định như đã mô tả.
+
 ## Driver Paginator
 
 Request nhận vào đối tượng kiểu `CrawlRequest` có thuộc tính `url` và `filter.page.from` và `filter.page.to`.
@@ -426,10 +426,14 @@ Kết quả fetch được có thể chia làm 2 loại:
 Interface `IDriverFetcher` đại diện cho thao tác lấy dữ liệu từ đường dẫn:
 
 ```ts
-export interface IDriverFetcher {
-  fetch(url: string): string | Promise<string>
+export interface IDriverFetcher<TFetchOptions = RequestInit>
+  fetch(url: string, options?: TFetchOptions): string | Promise<string>
 }
 ```
+
+Kiểu `RequestInit` là tham số cấu hình cho hàm `fetch(resource, options)` trong Fetch API.
+
+Thay đổi `TFetchOption` nếu sử dụng cách thức gọi API khác ngoài Fetch API (ví dụ: `axios`)
 
 ## Driver Crawler
 
@@ -467,12 +471,11 @@ export interface IDriverValidator<T> {
 }
 ```
 
-## Driver Transformer
+## Transformer và Exporter
 
-Driver Transformer dùng để biến đổi (transform) đối tượng cào được `TCrawlData` thành `TTransformedData`:
+Chiến lược export sẽ là xuất file theo từng batch. Vì lý do lấy dữ liệu theo từng batch nhỏ chứ không phải để dữ liệu dồn toàn bộ vào một list, do đó sẽ không có tùy chọn trả về  theo response.
 
-```ts
-export interface IDriverTransformer<TCrawlData, TTransformedData = TCrawlData> {
-  transform(data: TCrawlData): TTransformedData | Promise<TTransformedData>
-}
-```
+Có rất nhiều định dạng file có thể export như `.docx`, `.txt`, `.csv`, `xlsx`, ... nên exporter cho một driver cho phép inject nhiều export service.
+
+Các export service không được phép phụ thuộc vào định dạng của dữ liệu truyền vào. Chỉ cần quan tâm dữ liệu truyền vào sẽ có dạng mảng `TData[]`.
+
