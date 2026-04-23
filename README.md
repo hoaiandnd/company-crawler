@@ -479,3 +479,17 @@ Có rất nhiều định dạng file có thể export như `.docx`, `.txt`, `.c
 
 Các export service không được phép phụ thuộc vào định dạng của dữ liệu truyền vào. Chỉ cần quan tâm dữ liệu truyền vào sẽ có dạng mảng `TData[]`.
 
+Hệ thống sẽ định nghĩa các export service dùng chung. Driver hỗ trợ định dạng nào sẽ khai báo sử dụng service tương ứng thông qua phương thức `_registerExporters()` sẽ định nghĩa trong `DriverBase`.
+
+```ts
+export type KeyofExporter = keyof ExporterMap
+export class DriverBase<TCrawlData extends { phone: number }, TFetchOptions = RequestInit> extends Driver {
+  // các thành phần khác ...
+  protected _exporters?: KeyofExporter[]
+  protected _registerExporters(keys: KeyofExporter[]) {
+    this._exporters = keys
+    return this
+  }
+}
+```
+
