@@ -217,7 +217,7 @@ export type DriverComponent<TCrawlData, TFetchOptions> = {
   validator?: IDriverValidator<TCrawlData>
 }
 
-export class DriverBase<TCrawlData extends { phone: number }, TFetchOptions = RequestInit> extends Driver<TCrawlData> {
+export class DriverBase<TCrawlData extends { phone: string }, TFetchOptions = RequestInit> extends Driver<TCrawlData> {
   protected readonly _components: DriverComponent<TCrawlData, TFetchOptions>
   constructor(components: DriverComponent<TCrawlData, TFetchOptions>) {
     super()
@@ -307,14 +307,14 @@ File cấu hình sẽ có các thuộc tính như sau:
 Vì cấu trúc file JSON là giống nhau, Driver Configuration Loader có thể sử dụng chung theo nguyên mẫu interface sau:
 
 ```ts
-export interface IDriverConfigurationLoader<TJsonType> {
-  load(domain: string): Promise<TJsonType>
+export interface IDriverConfigurationLoader {
+  load(domain: string): Promise<DriverConfiguration>
 }
 ```
 
 Trong đó:
 
-- `TJsonType` là kiểu đối tượng của toàn file cấu hình.
+- `DriverConfiguration` là kiểu đối tượng của toàn file cấu hình.
 
 - Tham số `domain` sẽ lấy từ `CrawlRequest.url`.
 
@@ -524,7 +524,7 @@ await exporter.export(data)
 Driver sẽ khai báo sử dụng service tương ứng thông qua phương thức `registerExporters()` sẽ định nghĩa trong `DriverBase`.
 
 ```ts
-export class DriverBase<TCrawlData extends { phone: number }, TFetchOptions = RequestInit> extends Driver {
+export class DriverBase<TCrawlData extends { phone: string }, TFetchOptions = RequestInit> extends Driver {
   // các thành phần khác ...
   public registerExporters(exporters?: IDriverExporter[]) {
     this._components.exporters = exporters
@@ -544,3 +544,4 @@ Do đó, các phương thức nếu gặp trường hợp ngoại lệ, hãy né
 
 Các lỗi bị ném ra từ các thành phần sẽ được xử lý tập trung tại phương thức `Driver._run()` mà không cần quan tâm đến lớp xử lý exception của hệ thống bên ngoài.
 
+Các ngoại lệ đều có tên bắt đầu bằng tiền tố `ERR_`.
