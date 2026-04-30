@@ -117,7 +117,7 @@ export class DriverLoader {
 }
 ```
 
-Lớp `Driver` là lớp cơ sở (lớp cha) cho các lớp driver cụ thể. Lớp cơ sở này cung cấp duy nhất một phương thức ra ngoài là phương thức `crawlAndExport()` với cách sử dụng sau:
+Lớp `Driver` là lớp cơ sở (lớp cha) cho các lớp driver cụ thể. Lớp cơ sở này cung cấp duy nhất một phương thức `public` là `crawl()` với cách sử dụng sau:
 
 ```ts
 app.post(async (req, res) => {
@@ -135,12 +135,17 @@ app.post(async (req, res) => {
     throw new Error('ERR_UNSUPPORTED_DOMAIN')
     return
   }
-  const crawlResult = await driver.crawlAndExport(crawlRequest)
+  const crawlResult = await driver.crawl(crawlRequest).export({
+    fileName: 'company-src-1.csv',
+    transformFn: (data) => {
+      return { data.name, data.phone }
+    }
+  })
   // code ...
 })
 ```
 
-Phương thức `crawlAndExport()` trả về kiểu `CrawlResult`:
+Phương thức `export()` (từ phương thức `crawl()`) sẽ trả về kiểu `CrawlResult`:
 
 ```ts
 export type SuccessCrawlResult = {
@@ -165,17 +170,21 @@ export type DriverContext = {
   crawlRequest?: CrawlRequest
   driverConfig?: DriverConfig // xem mục # Driver Configuration Loader
 }
-export abstract class Driver {
+
+export abstract class Driver<TData = any> {
   protected _context?: DriverContext
   construction() {
     this._context = undefined
   }
-  protected abstract _run(exportOptions?: ExportOptions): CrawlResult | Promise<CrawlResult>
-  public crawlAndExport(crawlRequest: CrawlRequest, exportOptions?: ExportOptions) {
+  protected abstract _run(exportOptions?: ExportOptions<TData>): CrawlResult | Promise<CrawlResult>
+  public crawl(crawlRequest: CrawlRequest) {
     if (!crawlRequest) {
       throw new Error('ERR_NO_REQUEST_DATA')
     }
     this._context = { crawlRequest }
+    return this
+  }
+  public export(exportOptions?: ExportOptions<TData>) {
     return this._run(exportOptions)
   }
 }
@@ -184,14 +193,17 @@ export abstract class Driver {
 Trong đó, kiểu `ExportOptions` có dạng như sau:
 
 ```ts
-export type ExportOptions = {
+export type FileMode = 'append' | 'create'
+export type ExportOptions<TData> = {
   fileName?: string
+  mode?: FileMode
+  transformFn?: <TTransformedData>(data: TData) => TTransformedData
   // các thuộc tính cấu hình khác - phát triển sau
 }
 ```
 
 > [!Important]
-> Thuộc tính `Driver._context.crawlRequest` sẽ tự có giá trị khi gọi `crawlAndExport()`. Các lớp driver kế thừa chỉ cần định nghĩa phương thức `run()`. Phương thức `run()` sẽ chỉ cần quan tâm đến các điều kiện lọc, nơi gọi các phương thức khác.
+> Thuộc tính `Driver._context.crawlRequest` sẽ tự có giá trị khi gọi `crawl()`. Các lớp driver kế thừa chỉ cần định nghĩa phương thức `_run()`. Phương thức `_run()` sẽ chỉ cần quan tâm đến các điều kiện lọc, nơi gọi các phương thức khác.
 
 **Ví dụ:**
 
@@ -201,10 +213,11 @@ export type DriverComponent<TCrawlData, TFetchOptions> = {
   paginator: IDriverPaginator
   fetcher: IDriverFetcher<TFetchOptions>
   crawler: IDriverCrawler<TCrawlData>
+  exporters?: IDriverExporter[]
   validator?: IDriverValidator<TCrawlData>
 }
 
-export class DriverBase<TCrawlData extends { phone: number }, TFetchOptions = RequestInit> extends Driver {
+export class DriverBase<TCrawlData extends { phone: number }, TFetchOptions = RequestInit> extends Driver<TCrawlData> {
   protected readonly _components: DriverComponent<TCrawlData, TFetchOptions>
   constructor(components: DriverComponent<TCrawlData, TFetchOptions>) {
     super()
@@ -473,23 +486,61 @@ export interface IDriverValidator<T> {
 
 ## Transformer và Exporter
 
-Chiến lược export sẽ là xuất file theo từng batch. Vì lý do lấy dữ liệu theo từng batch nhỏ chứ không phải để dữ liệu dồn toàn bộ vào một list, do đó sẽ không có tùy chọn trả về  theo response.
+Chiến lược export sẽ là xuất file theo từng batch. Vì lý do lấy dữ liệu theo từng batch nhỏ chứ không phải để dữ liệu dồn toàn bộ vào một list, do đó sẽ không có tùy chọn trả về theo response.
 
 Có rất nhiều định dạng file có thể export như `.docx`, `.txt`, `.csv`, `xlsx`, ... nên exporter cho một driver cho phép inject nhiều export service.
 
 Các export service không được phép phụ thuộc vào định dạng của dữ liệu truyền vào. Chỉ cần quan tâm dữ liệu truyền vào sẽ có dạng mảng `TData[]`.
 
-Hệ thống sẽ định nghĩa các export service dùng chung. Driver hỗ trợ định dạng nào sẽ khai báo sử dụng service tương ứng thông qua phương thức `_registerExporters()` sẽ định nghĩa trong `DriverBase`.
+Một export service phải triển khai interface `IDriverExporter` như sau:
 
 ```ts
-export type KeyofExporter = keyof ExporterMap
+export type DriverExporterOptions = Omit<ExportOptions, 'transformFn'>
+export interface IDriverExporter {
+  canHandle: (format: string) => boolean
+  export: <T = any>(data: T[], options: DriverExporterOptions) => void | Promise<void>
+}
+```
+
+> [!Note]
+> Thuộc tính `transformFn` sẽ được lấy ra khỏi `ExportOptions` để thực hiện chuyển đổi dữ liệu trước khi đưa vào phương thức `export()`. Exporter service chỉ cần quan tâm đến cách để xuất thành file, không quan tâm đến dữ liệu ra sao.
+
+Mỗi driver sẽ khai báo đăng ký các export service cho riêng driver đó. Tuy vậy, có thể định nghĩa để sử dụng chung cho nhiều driver.
+
+Phương thức `canHandle()` dùng để xác định export driver nào có thể xử lý được một định dạng file nhất định.
+
+**Ví dụ:**
+
+```ts
+const exporter = this._components.exporters.find(e => e.canHandle('.docx'))
+if(!exporter) {
+  throw new Error('ERR_FORMAT_CANNOT_HANDLE')
+  return  
+}
+await exporter.export(data)
+// code ...
+```
+
+Driver sẽ khai báo sử dụng service tương ứng thông qua phương thức `registerExporters()` sẽ định nghĩa trong `DriverBase`.
+
+```ts
 export class DriverBase<TCrawlData extends { phone: number }, TFetchOptions = RequestInit> extends Driver {
   // các thành phần khác ...
-  protected _exporters?: KeyofExporter[]
-  protected _registerExporters(keys: KeyofExporter[]) {
-    this._exporters = keys
+  public registerExporters(exporters?: IDriverExporter[]) {
+    this._components.exporters = exporters
     return this
   }
 }
 ```
+
+## Xử lý ngoại lệ - Exception Handling
+
+Với tư tưởng:
+
+- Không phụ thuộc vào hệ thống bên ngoài (framework, library, ...).
+- Các kiểu dữ liệu sẽ không mang tính tùy chọn `T | undefined | null`.
+
+Do đó, các phương thức nếu gặp trường hợp ngoại lệ, hãy ném ra một `Error`.
+
+Các lỗi bị ném ra từ các thành phần sẽ được xử lý tập trung tại phương thức `Driver._run()` mà không cần quan tâm đến lớp xử lý exception của hệ thống bên ngoài.
 
