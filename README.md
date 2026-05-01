@@ -308,7 +308,7 @@ Vì cấu trúc file JSON là giống nhau, Driver Configuration Loader có th�
 
 ```ts
 export interface IDriverConfigurationLoader {
-  load(domain: string): Promise<DriverConfiguration>
+  load(domain: string): Promise<DriverConfig>
 }
 ```
 

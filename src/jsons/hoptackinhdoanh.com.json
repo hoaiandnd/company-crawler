@@ -1,0 +1,33 @@
+{
+  "name": "Page name",
+  "domain": "hoptackinhdoanh.com",
+  "supportedExportFormats": ["docx", "csv"],
+  "crawlLimit": 10,
+  "concurrencyRequestLimit": 5,
+  "dateFormat": "YYYY-MM-DD",
+  "selectors": {
+    "companyLinks": "body > div > a",
+    "companyDetail": {
+      "name": "body > div.name",
+      "phone": "body > div.phone",
+      "taxCode": "body > div.taxCode",
+      "address": "body > div.address",
+      "founder": "body > div.founder",
+      "startDate": "body > div.startDate",
+      "email": "body > div.email",
+      "primaryBusiness": "body > div.primary-business"
+    }
+  },
+  "blackList": {
+    "name": {
+      "rules": ["văn phòng đại diện", "Ủy ban", "ubnd", "công an", "massage", "ntnn"],
+      "validateType": "includes",
+      "ignoreCase": true
+    },
+    "phone": {
+      "rules": ["02"],
+      "validateType": "startsWith",
+      "ignoreCase": true
+    }
+  }
+}
