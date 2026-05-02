@@ -4,7 +4,6 @@ import { CrawlResult, DriverComponent, ExportOptions } from '@/types/driver.js'
 import { getDomainFromUrl } from '@/utils/extractor.js'
 import { waitRandom } from '@/utils/function.js'
 import { DriverContext } from '@/providers/DriverContext.js'
-import { fa } from 'zod/locales'
 
 export class DriverBase<TCrawlData extends { phone: string }, TFetchOptions = RequestInit> {
   protected readonly _components: DriverComponent<TCrawlData, TFetchOptions>
@@ -37,7 +36,7 @@ export class DriverBase<TCrawlData extends { phone: string }, TFetchOptions = Re
     let crawlLimit = filters?.limit && filters.limit > 0 ? filters.limit : this._context.driverConfig.crawlLimit
     const page = await paginator.paginate(this._context)
     const format = this._context.crawlRequest.exportFormat ?? 'csv'
-    const exportedFileName = exportOptions?.fileName ?? `${crawlDomain}_${Date.now()}.${format}`
+    const exportedFileName = exportOptions?.fileName ?? `${crawlDomain}_${Date.now()}.${format.replace(/^\./, '')}`
     while (crawlLimit >= 0) {
       await waitRandom()
 
@@ -56,7 +55,9 @@ export class DriverBase<TCrawlData extends { phone: string }, TFetchOptions = Re
           }
         }
         await exporter.export(transformedCompnanies, { ...exportOptions, fileName: exportedFileName })
+        transformedCompnanies.length = 0 // giải phóng bộ nhớ
       }
+      companies.length = 0 // giải phóng bộ nhớ cho mảng sau khi xuất dữ liệu
       await page.goNext()
       crawlLimit--
     }
