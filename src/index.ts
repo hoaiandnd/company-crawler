@@ -1,3 +1,5 @@
+import { DriverConfigurationLoader } from '@/providers/DriverConfigurationLoader.js'
+import { DriverContext } from '@/providers/DriverContext.js'
 import { parseRequest } from '@/utils/builder.js'
 import express, { Request, Response } from 'express'
 
@@ -9,6 +11,7 @@ app.use(express.json())
 app.get('/', async (req: Request, res: Response) => {
   try {
     const crawlRequest = await parseRequest(req)
+    const driverContext = await DriverContext.create(crawlRequest, new DriverConfigurationLoader())
   } catch (error) {
     res.status(400).json({ error: error instanceof Error ? error.message : 'SOMETHING_WENT_WRONG' })
   }

@@ -1,25 +1,20 @@
-import { ErrorMessage } from '@/constants/error.js'
-import { Driver } from '@/providers/Driver.js'
-import { CrawlResult, ExportOptions, IDriverConfigurationLoader } from '@/types/driver.js'
-import { getDomainFromUrl } from '@/utils/extractor.js'
-import { waitRandom } from '@/utils/function.js'
-import { url } from 'inspector/promises'
 import pLimit from 'p-limit'
 
-export type DriverComponent<TCrawlData, TFetchOptions> = {
-  configLoader: IDriverConfigurationLoader
-  paginator: IDriverPaginator
-  fetcher: IDriverFetcher<TFetchOptions>
-  crawler: IDriverCrawler<TCrawlData>
-  exporters?: IDriverExporter[]
-  validator?: IDriverValidator<TCrawlData>
-}
+import { CrawlResult, DriverComponent, ExportOptions } from '@/types/driver.js'
+import { getDomainFromUrl } from '@/utils/extractor.js'
+import { waitRandom } from '@/utils/function.js'
+import { DriverContext } from '@/providers/DriverContext.js'
+import { fa } from 'zod/locales'
 
-export class DriverBase<TCrawlData extends { phone: string }, TFetchOptions = RequestInit> extends Driver<TCrawlData> {
+export class DriverBase<TCrawlData extends { phone: string }, TFetchOptions = RequestInit> {
   protected readonly _components: DriverComponent<TCrawlData, TFetchOptions>
-  constructor(components: DriverComponent<TCrawlData, TFetchOptions>) {
-    super()
+
+  // chứa các thông tin sẽ được truyền cho các thành phần của driver
+  protected readonly _context: DriverContext
+
+  constructor(components: DriverComponent<TCrawlData, TFetchOptions>, context: DriverContext) {
     this._components = components
+    this._context = context
   }
   protected _setFetchQueue(companyLinks: string[]) {
     const DEFAULT_CRAWL_LIMIT = 5
@@ -27,28 +22,22 @@ export class DriverBase<TCrawlData extends { phone: string }, TFetchOptions = Re
     const fetchAndCrawl = async (url: string) => {
       const html = await this._components.fetcher.fetch(url)
       const companyDetail = await this._components.crawler.crawl(html, this._context?.driverConfig)
-      const isValid = await this._components.validator?.validate(companyDetail)
+      const isValid = await this._components.validator?.validate(this._context, companyDetail)
       return isValid ? companyDetail : null
     }
     const fetchQueue = companyLinks.map(url => limiter(() => fetchAndCrawl(url)))
     return Promise.all(fetchQueue)
   }
   protected async _run(exportOptions?: ExportOptions<TCrawlData>): Promise<CrawlResult> {
-    if (!this._context) {
-      throw new Error(ErrorMessage.ERR_DRIVER_HAS_NO_CONTEXT)
-    }
-    if (!this._context.crawlRequest) {
-      throw new Error(ErrorMessage.ERR_NO_REQUEST_DATA)
-    }
     // sử dụng các thành phần đề tạo thành một chức năng hoàn chỉnh
-    const { configLoader, paginator, fetcher, crawler, exporters } = this._components
+    const { paginator, fetcher, crawler, exporters } = this._components
     const { url, filters } = this._context?.crawlRequest
     const crawlDomain = getDomainFromUrl(url)
     // load and save driver configurations
-    this._context.driverConfig = await configLoader.load(crawlDomain)
     let crawlLimit = filters?.limit && filters.limit > 0 ? filters.limit : this._context.driverConfig.crawlLimit
-    const page = paginator.paginate(this._context.crawlRequest)
-
+    const page = await paginator.paginate(this._context)
+    const format = this._context.crawlRequest.exportFormat ?? 'csv'
+    const exportedFileName = exportOptions?.fileName ?? `${crawlDomain}_${Date.now()}.${format}`
     while (crawlLimit >= 0) {
       await waitRandom()
 
@@ -57,10 +46,31 @@ export class DriverBase<TCrawlData extends { phone: string }, TFetchOptions = Re
 
       const companies = await this._setFetchQueue(companyLinks)
 
-      //  transform `companies` before exporting ...
-
-      paginator.goNext()
+      const exporter = exporters?.find(e => e.canHandle(format))
+      if (exporter) {
+        const transformFn = exportOptions?.transformFn ?? (data => data) // nếu không có transformFn, sử dụng hàm mặc định trả về dữ liệu gốc
+        const transformedCompnanies = []
+        for (const company of companies) {
+          if (company) {
+            transformedCompnanies.push(transformFn(company))
+          }
+        }
+        await exporter.export(transformedCompnanies, { ...exportOptions, fileName: exportedFileName })
+      }
+      await page.goNext()
       crawlLimit--
+    }
+    if (crawlLimit < 0) {
+      return {
+        isFinish: true,
+        lastPage: page.current.page,
+        exportedFileName
+      }
+    } else {
+      return {
+        isFinish: false,
+        lastPage: page.current.page
+      }
     }
   }
 }

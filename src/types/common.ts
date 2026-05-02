@@ -1,4 +1,4 @@
-import { CrawlRequestSchema } from '@/types/json-schema.js'
+import { CompanyDetailSchema, CrawlRequestSchema } from '@/types/json-schema.js'
 import z from 'zod'
 
 // export type ExportFormat = 'docx' | 'csv' | 'txt' | 'xlsx'
@@ -17,3 +17,4 @@ import z from 'zod'
 //   date?: CrawlFilterRange<number | string>
 // }
 export type CrawlRequest = z.infer<typeof CrawlRequestSchema>
+export type CompanyDetail = z.infer<typeof CompanyDetailSchema>

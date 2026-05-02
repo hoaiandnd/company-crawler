@@ -34,8 +34,8 @@ export interface IDriverConfigurationLoader {
 }
 
 export type DriverContext = {
-  crawlRequest?: CrawlRequest
-  driverConfig?: DriverConfig
+  crawlRequest: CrawlRequest
+  driverConfig: DriverConfig
 }
 
 type FileMode = 'append' | 'create'
@@ -44,4 +44,48 @@ export type ExportOptions<TData> = {
   mode?: FileMode
   transformFn?: <TTransformedData>(data: TData) => TTransformedData
   // các thuộc tính cấu hình khác - phát triển sau
+}
+
+export type PaginationInfo = {
+  url: string // url đến trang được chỉ định - có thể sử dụng ngay
+  page: number // chỉ số trang được xét - đồng bộ với `url`
+}
+export type PaginationResult = {
+  current: PaginationInfo // trang hiện tại - dùng trực tiếp để fetch
+  next: PaginationInfo // trang tiếp theo - dùng khi kết thúc fetch
+  goNext: () => void | Promise<void> // thay đổi `current` và `next` của object hiện tại
+}
+
+export type DriverComponent<TCrawlData, TFetchOptions> = {
+  configLoader: IDriverConfigurationLoader
+  paginator: IDriverPaginator
+  fetcher: IDriverFetcher<TFetchOptions>
+  crawler: IDriverCrawler<TCrawlData>
+  exporters?: IDriverExporter[]
+  validator?: IDriverValidator<TCrawlData>
+}
+
+export interface IDriverPaginator {
+  paginate(context: DriverContext): PaginationResult | Promise<PaginationResult>
+}
+
+export interface IDriverFetcher<TFetchOptions = RequestInit> {
+  fetch(url: string, options?: TFetchOptions): string | Promise<string>
+}
+
+export interface IDriverCrawler<T> {
+  // cào các link đến các trang chi tiết
+  crawlLinks(html: string, selector: string): string[] | Promise<string[]>
+  // cào thông tin chi tiết
+  crawl(html: string, config: DriverConfig): T | Promise<T>
+}
+
+export interface IDriverValidator<T> {
+  validate(context: DriverContext, data: T): boolean | Promise<boolean>
+}
+
+export type DriverExporterOptions<T> = Omit<ExportOptions<T>, 'transformFn'>
+export interface IDriverExporter {
+  canHandle: (format: string) => boolean
+  export: <T = any>(data: T[], options?: DriverExporterOptions<T>) => void | Promise<void>
 }
