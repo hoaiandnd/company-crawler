@@ -11,6 +11,7 @@ app.use(express.json())
 app.get('/', async (req: Request, res: Response) => {
   try {
     const crawlRequest = await parseRequest(req)
+    //  truyền vào hàm tạo của driver - sử dụng xuyên suốt
     const driverContext = await DriverContext.create(crawlRequest, new DriverConfigurationLoader())
   } catch (error) {
     res.status(400).json({ error: error instanceof Error ? error.message : 'SOMETHING_WENT_WRONG' })
