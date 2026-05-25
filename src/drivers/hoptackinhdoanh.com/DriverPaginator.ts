@@ -52,7 +52,5 @@ export class DriverPaginator implements IDriverPaginator {
         ;((current = { ...next }), (next = createPaginationInfo(url, current.page + 1)))
       }
     }
-
-    throw new Error(ErrorMessage.ERR_METHOD_NOT_IMPLEMENTED)
   }
 }
