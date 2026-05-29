@@ -5,6 +5,7 @@ import * as cheerio from 'cheerio'
 export class DriverCrawler implements IDriverCrawler<CompanyDetail> {
   getCompanyDetail(selector: DriverConfig['selectors'], html?: string) {
     const selectors = selector?.companyDetail
+    if (!selectors) throw new Error('ERR_SELECTOR_COMPANY_DETAIL_EMPTY')
   }
   crawlLinks(html: string, selector: string): string[] | Promise<string[]> {
     if (html === '') throw new Error('ERR_HTML_EMPTY')
