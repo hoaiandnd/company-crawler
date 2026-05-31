@@ -1,3 +1,4 @@
+import { ErrorMessage } from '@/constants/error.js'
 import { CompanyDetail } from '@/types/common.js'
 import { DriverConfig, IDriverCrawler } from '@/types/driver.js'
 import * as cheerio from 'cheerio'
@@ -6,6 +7,19 @@ export class DriverCrawler implements IDriverCrawler<CompanyDetail> {
   getCompanyDetail(selector: DriverConfig['selectors'], html?: string) {
     const selectors = selector?.companyDetail
     if (!selectors) throw new Error('ERR_SELECTOR_COMPANY_DETAIL_EMPTY')
+    if (!html) throw new Error(ErrorMessage.ERR_HTML_EMPTY)
+    const $ = cheerio.load(html)
+    const companyDetail: CompanyDetail = {
+      name: $(selectors.name).text().trim(),
+      address: $(selectors.address).text().trim(),
+      phone: $(selectors.phone).text().trim(),
+      email: $(selectors.email).text().trim(),
+      taxCode: $(selectors.taxCode).text().trim(),
+      founder: $(selectors.founder).text().trim(),
+      primaryBusiness: $(selectors.primaryBusiness).text().trim(),
+      startDate: $(selectors.startDate).text().trim()
+    }
+    return companyDetail
   }
   crawlLinks(html: string, selector: string): string[] | Promise<string[]> {
     if (html === '') throw new Error('ERR_HTML_EMPTY')
@@ -19,13 +33,6 @@ export class DriverCrawler implements IDriverCrawler<CompanyDetail> {
   crawl(html: string, config: DriverConfig): CompanyDetail | Promise<CompanyDetail> {
     const selectors = config.selectors?.companyDetail
     const $ = cheerio.load(html)
-    for (const key in selectors) {
-      const selector = selectors?.[key as keyof typeof selectors]
-      const value = $(selector).text().trim()
-      if(value) {
-
-      }
-    }
-    throw new Error('Method not implemented.')
+    return this.getCompanyDetail(config.selectors, html)
   }
 }
