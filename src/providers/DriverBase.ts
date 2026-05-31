@@ -66,6 +66,9 @@ export class DriverBase<TCrawlData extends { phone: string }, TFetchOptions = Re
         await exporter.export(transformedCompnanies, { ...exportOptions, fileName: exportedFileName })
         transformedCompnanies.length = 0 // giải phóng bộ nhớ
       }
+      else {
+        console.log('No suitable exporter found.')
+      }
       companies.length = 0 // giải phóng bộ nhớ cho mảng sau khi xuất dữ liệu
       await page.goNext()
       limit--
