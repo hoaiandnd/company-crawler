@@ -22,8 +22,8 @@ export class DriverCrawler implements IDriverCrawler<CompanyDetail> {
     return companyDetail
   }
   crawlLinks(html: string, selector: string): string[] | Promise<string[]> {
-    if (html === '') throw new Error('ERR_HTML_EMPTY')
-    if (selector === '') throw new Error('ERR_SELECTOR_EMPTY')
+    if (!html) throw new Error(ErrorMessage.ERR_HTML_EMPTY)
+    if (!selector) throw new Error(ErrorMessage.ERR_SELECTOR_EMPTY)
     const $ = cheerio.load(html)
     const links = $(selector)
       .map((i, el) => $(el).attr('href'))
@@ -32,7 +32,7 @@ export class DriverCrawler implements IDriverCrawler<CompanyDetail> {
   }
   crawl(html: string, config: DriverConfig): CompanyDetail | Promise<CompanyDetail> {
     const companySelectors = config?.selectors?.companyDetail
-    if (!companySelectors) throw new Error('ERR_SELECTOR_COMPANY_DETAIL_EMPTY')
+    if (!companySelectors) throw new Error(ErrorMessage.ERR_SELECTOR_COMPANY_DETAIL_EMPTY)
     if (!html) throw new Error(ErrorMessage.ERR_HTML_EMPTY)
     const $ = cheerio.load(html)
     const companyDetail: CompanyDetail = {
