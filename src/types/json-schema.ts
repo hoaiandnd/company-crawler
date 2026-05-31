@@ -26,7 +26,7 @@ export const CompanyDetailSchema = z.object({
   phone: z.string().length(10),
   address: z.string().optional(),
   startDate: z.string().optional(),
-  email: z.string().email().optional(),
+  email: z.email().optional(),
   primaryBusiness: z.string().optional()
 })
 

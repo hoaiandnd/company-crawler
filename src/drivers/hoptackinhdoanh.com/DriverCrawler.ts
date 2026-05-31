@@ -31,8 +31,21 @@ export class DriverCrawler implements IDriverCrawler<CompanyDetail> {
     return links
   }
   crawl(html: string, config: DriverConfig): CompanyDetail | Promise<CompanyDetail> {
-    const selectors = config.selectors?.companyDetail
+    const companySelectors = config?.selectors?.companyDetail
+    if (!companySelectors) throw new Error('ERR_SELECTOR_COMPANY_DETAIL_EMPTY')
+    if (!html) throw new Error(ErrorMessage.ERR_HTML_EMPTY)
     const $ = cheerio.load(html)
-    return this.getCompanyDetail(config.selectors, html)
+    const companyDetail: CompanyDetail = {
+      name: $(companySelectors.name).text().trim(),
+      address: $(companySelectors.address).text().trim(),
+      phone: $(companySelectors.phone).text().trim(),
+      email: $(companySelectors.email).text().trim(),
+      taxCode: $(companySelectors.taxCode).text().trim(),
+      founder: $(companySelectors.founder).text().trim(),
+      primaryBusiness: $(companySelectors.primaryBusiness).text().trim(),
+      startDate: $(companySelectors.startDate).text().trim()
+    }
+    return companyDetail
+    // return this.getCompanyDetail(config.selectors, html)
   }
 }
