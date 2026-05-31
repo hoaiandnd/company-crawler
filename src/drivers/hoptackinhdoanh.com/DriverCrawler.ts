@@ -28,13 +28,16 @@ export class DriverCrawler implements IDriverCrawler<CompanyDetail> {
       companySelectors,
       'name',
       'address',
-      'phone',
+      // 'phone',
       'email',
       'taxCode',
       'founder',
       'primaryBusiness',
       'startDate'
     )
-    return { ...objectMap }
+    return {
+      ...objectMap,
+      phone: $(companySelectors.phone).attr('data-phone-full') ?? ''
+    }
   }
 }
