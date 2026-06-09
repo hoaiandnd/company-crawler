@@ -20,16 +20,16 @@ export const CrawlRequestSchema = z.object({
   exportFormat: ExportFormatSchema.optional(),
   filters: CrawlFilterSchema.optional()
 })
-
+const OptionalString = z.string().optional().default('')
 export const CompanyDetailSchema = z.object({
-  name: z.string().optional().default(''),
-  founder: z.string().optional().default(''),
-  taxCode: z.string().optional().default(''),
-  phone: z.string().length(10),
-  address: z.string().optional().default(''),
-  startDate: z.string().optional().default(''),
-  email: z.string().optional().default(''),
-  primaryBusiness: z.string().optional().default('')
+  name: OptionalString,
+  founder: OptionalString,
+  taxCode: OptionalString,
+  phone: OptionalString,
+  address: OptionalString,
+  startDate: OptionalString,
+  email: OptionalString,
+  primaryBusiness: OptionalString
 })
 
 export const SelectorSchema = z.object({
