@@ -90,7 +90,7 @@ export class DriverBase<
         })
         transformedCompnanies.length = 0 // giải phóng bộ nhớ
       } else {
-        console.log('No suitable exporter found.')
+        companies.forEach(company => console.log(company?.phone ?? 'NO PHONE'))
       }
       companies.length = 0 // giải phóng bộ nhớ cho mảng sau khi xuất dữ liệu
       await page.goNext()

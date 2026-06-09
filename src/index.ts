@@ -13,7 +13,7 @@ const PORT = 3000
 
 app.use(express.json())
 
-app.get('/', async (req: Request, res: Response) => {
+app.post('/', async (req: Request, res: Response) => {
   try {
     const crawlRequest = await parseRequest(req)
     //  truyền vào hàm tạo của driver - sử dụng xuyên suốt
