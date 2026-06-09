@@ -23,7 +23,8 @@ export class DriverConfigurationLoader implements IDriverConfigurationLoader {
       const json = JSON.parse(text)
       const result = DriverConfigSchema.parse(json)
       return result
-    } catch {
+    } catch (err) {
+      console.log((err as Error).message)
       // json parsing error or schema validation error
       throw new Error(ErrorMessage.ERR_CANNOT_PARSE_DRIVER_CONFIG)
     }
