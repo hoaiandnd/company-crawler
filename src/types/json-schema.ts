@@ -10,7 +10,9 @@ const createCrawlFilterRangeSchema = <T extends z.ZodTypeAny>(valueSchema: T) =>
 const CrawlFilterSchema = z.object({
   limit: z.number().int().positive().optional(),
   page: createCrawlFilterRangeSchema(z.number().int().positive()).optional(),
-  date: createCrawlFilterRangeSchema(z.union([z.number().int().positive(), z.string()])).optional()
+  date: createCrawlFilterRangeSchema(
+    z.union([z.number().int().positive(), z.string()])
+  ).optional()
 })
 
 export const CrawlRequestSchema = z.object({
@@ -20,14 +22,14 @@ export const CrawlRequestSchema = z.object({
 })
 
 export const CompanyDetailSchema = z.object({
-  name: z.string().optional(),
-  founder: z.string().optional(),
-  taxCode: z.string().optional(),
+  name: z.string().optional().default(''),
+  founder: z.string().optional().default(''),
+  taxCode: z.string().optional().default(''),
   phone: z.string().length(10),
-  address: z.string().optional(),
-  startDate: z.string().optional(),
-  email: z.email().optional(),
-  primaryBusiness: z.string().optional()
+  address: z.string().optional().default(''),
+  startDate: z.string().optional().default(''),
+  email: z.string().optional().default(''),
+  primaryBusiness: z.string().optional().default('')
 })
 
 export const SelectorSchema = z.object({
@@ -41,7 +43,10 @@ export const RuleSchema = z.object({
   ignoreCase: z.boolean().optional().default(false)
 })
 
-export const BlackListSchema = z.record(CompanyDetailSchema.keyof(), RuleSchema.optional())
+export const BlackListSchema = z.record(
+  CompanyDetailSchema.keyof(),
+  RuleSchema.optional()
+)
 
 export const DriverConfigSchema = z.object({
   name: z.string().optional().default(''),
