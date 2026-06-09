@@ -22,6 +22,10 @@ export class DriverConfigurationLoader implements IDriverConfigurationLoader {
       console.log('...Driver configuration loaded:', text)
       const json = JSON.parse(text)
       const result = DriverConfigSchema.parse(json)
+      console.log(
+        'Configuration file read successfully:',
+        JSON.stringify(result, null, 2)
+      )
       return result
     } catch (err) {
       console.log((err as Error).message)
