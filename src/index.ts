@@ -27,8 +27,8 @@ app.post('/', async (req: Request, res: Response) => {
         paginator: new DriverPaginator(),
         fetcher: new DriverFetcher(),
         crawler: new DriverCrawler(),
-        validator: new DriverValidator(),
-        configLoader: new DriverConfigurationLoader()
+        validator: new DriverValidator()
+        // configLoader: new DriverConfigurationLoader()
       },
       driverContext
     )

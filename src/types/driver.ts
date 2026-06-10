@@ -57,7 +57,7 @@ export type PaginationResult = {
 }
 
 export type DriverComponent<TCrawlData, TFetchOptions> = {
-  configLoader: IDriverConfigurationLoader
+  // configLoader: IDriverConfigurationLoader
   paginator: IDriverPaginator
   fetcher: IDriverFetcher<TFetchOptions>
   crawler: IDriverCrawler<TCrawlData>
