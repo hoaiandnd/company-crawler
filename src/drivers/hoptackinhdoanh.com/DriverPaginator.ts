@@ -1,9 +1,15 @@
 import { Defaults } from '@/constants/default.js'
 import { ErrorMessage } from '@/constants/error.js'
 import { SearchParams } from '@/constants/search-params.js'
-import { DriverContext, IDriverPaginator, PaginationInfo, PaginationResult } from '@/types/driver.js'
+import {
+  DriverContext,
+  IDriverPaginator,
+  PaginationInfo,
+  PaginationResult
+} from '@/types/driver.js'
 
 export class DriverPaginator implements IDriverPaginator {
+  protected _provinceIds: Map<string, number> = new Map()
   validateUrl(url: string): boolean | Promise<boolean> {
     if (!url) {
       throw new Error(ErrorMessage.ERR_NO_URL)
@@ -11,7 +17,9 @@ export class DriverPaginator implements IDriverPaginator {
     const urlObj = new URL(url)
     if (urlObj.origin !== 'https://hoptackinhdoanh.com') return false
 
-    const pathMatch = urlObj.pathname.match(/^\/danh-ba-doanh-nghiep\/([a-z0-9-]+)$/)
+    const pathMatch = urlObj.pathname.match(
+      /^\/danh-ba-doanh-nghiep\/([a-z0-9-]+)$/
+    )
     if (!pathMatch) return false
     return true
   }
@@ -26,7 +34,9 @@ export class DriverPaginator implements IDriverPaginator {
     return startPage
   }
 
-  paginate(context: DriverContext): PaginationResult | Promise<PaginationResult> {
+  paginate(
+    context: DriverContext
+  ): PaginationResult | Promise<PaginationResult> {
     const { crawlRequest } = context
     const url = crawlRequest.url
     if (!url) {
@@ -49,7 +59,8 @@ export class DriverPaginator implements IDriverPaginator {
       current,
       next,
       goNext() {
-        ;((current = { ...next }), (next = createPaginationInfo(url, current.page + 1)))
+        ;((current = { ...next }),
+          (next = createPaginationInfo(url, current.page + 1)))
       }
     }
   }
