@@ -33,6 +33,7 @@ app.post('/', async (req: Request, res: Response) => {
       driverContext
     )
     await driver._run()
+    res.status(200).json({ message: 'CRAWL_SUCCESS' })
   } catch (error) {
     res.status(400).json({
       error: error instanceof Error ? error.message : 'SOMETHING_WENT_WRONG'

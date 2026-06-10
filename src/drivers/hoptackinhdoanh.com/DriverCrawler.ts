@@ -3,15 +3,18 @@ import { CompanyDetail } from '@/types/common.js'
 import { DriverConfig, IDriverCrawler } from '@/types/driver.js'
 import { toObjectMap } from '@/utils/extractor.js'
 import * as cheerio from 'cheerio'
+import { writeFile } from 'fs/promises'
 
 export class DriverCrawler implements IDriverCrawler<CompanyDetail> {
-  crawlLinks(html: string, selector: string): string[] | Promise<string[]> {
+  async crawlLinks(html: string, selector: string): Promise<string[]> {
+    await writeFile('./html.log.txt', html, 'utf8')
     if (!html) throw new Error(ErrorMessage.ERR_HTML_EMPTY)
     if (!selector) throw new Error(ErrorMessage.ERR_SELECTOR_EMPTY)
     const $ = cheerio.load(html)
     const links = $(selector)
       .map((_, el) => $(el).attr('href'))
       .get()
+    console.log('DriverCrawler:crawlLinks [Fn]: ', links.length)
     return links
   }
   crawl(
@@ -35,6 +38,7 @@ export class DriverCrawler implements IDriverCrawler<CompanyDetail> {
       'primaryBusiness',
       'startDate'
     )
+    console.log(objectMap['name'])
     return {
       ...objectMap,
       phone: $(companySelectors.phone).attr('data-phone-full') ?? ''

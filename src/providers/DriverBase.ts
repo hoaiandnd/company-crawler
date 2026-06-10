@@ -29,6 +29,7 @@ export class DriverBase<
     const fetchAndCrawl = async (url: string) => {
       try {
         const html = await this._components.fetcher.fetch(url)
+        console.log('html:', html)
         const companyDetail = await this._components.crawler.crawl(
           html,
           this._context?.driverConfig
@@ -75,6 +76,8 @@ export class DriverBase<
 
       const companies = await this._setFetchQueue(companyLinks)
 
+      console.log('CRAWLED COMPANIES:', companies.length) // test
+
       const exporter = exporters?.find(e => e.canHandle(format))
       if (exporter) {
         const transformFn = exportOptions?.transformFn ?? (data => data) // nếu không có transformFn, sử dụng hàm mặc định trả về dữ liệu gốc
@@ -90,6 +93,7 @@ export class DriverBase<
         })
         transformedCompnanies.length = 0 // giải phóng bộ nhớ
       } else {
+        console.log('CRAWLED COMPANIES:', companies.length)
         companies.forEach(company => console.log(company?.phone ?? 'NO PHONE'))
       }
       companies.length = 0 // giải phóng bộ nhớ cho mảng sau khi xuất dữ liệu

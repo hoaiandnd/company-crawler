@@ -6,9 +6,9 @@
   "concurrencyRequestLimit": 5,
   "dateFormat": "YYYY-MM-DD",
   "selectors": {
-    "companyLinks": "body > div > a",
+    "companyLinks": "div.companyPage-business-list-item-code > h3",
     "companyDetail": {
-      "name": "body > div.name",
+      "name": "body > div.app-content.content > div.pageContent > div > div > div > div.companyDetailHeader > div > h1",
       "phone": "body > div.phone",
       "taxCode": "body > div.taxCode",
       "address": "body > div.address",
@@ -20,7 +20,14 @@
   },
   "blackList": {
     "name": {
-      "rules": ["văn phòng đại diện", "Ủy ban", "ubnd", "công an", "massage", "ntnn"],
+      "rules": [
+        "văn phòng đại diện",
+        "Ủy ban",
+        "ubnd",
+        "công an",
+        "massage",
+        "ntnn"
+      ],
       "validateType": "includes",
       "ignoreCase": true
     },
