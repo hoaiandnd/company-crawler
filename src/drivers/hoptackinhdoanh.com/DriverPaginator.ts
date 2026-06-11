@@ -45,7 +45,10 @@ export class DriverPaginator implements IDriverPaginator {
     const urlValidationResult = this.validateUrl(url)
     if (!urlValidationResult) throw new Error(ErrorMessage.ERR_INVALID_REQUEST)
     const startPage = this.getStartPage(crawlRequest)
-    function createPaginationInfo(url: string, page: number): PaginationInfo {
+    const createPaginationInfo = (
+      url: string,
+      page: number
+    ): PaginationInfo => {
       const urlObj = new URL(url)
       urlObj.searchParams.set(SearchParams.PAGE, page.toString())
       return {
