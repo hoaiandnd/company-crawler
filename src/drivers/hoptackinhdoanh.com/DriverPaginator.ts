@@ -9,7 +9,7 @@ import {
 } from '@/types/driver.js'
 
 export class DriverPaginator implements IDriverPaginator {
-  protected _provinceIds: Map<string, number> = new Map()
+  protected _provinceSlugs: string[] = []
   validateUrl(url: string): boolean | Promise<boolean> {
     if (!url) {
       throw new Error(ErrorMessage.ERR_NO_URL)

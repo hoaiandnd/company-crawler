@@ -29,7 +29,6 @@ export class DriverBase<
     const fetchAndCrawl = async (url: string) => {
       try {
         const html = await this._components.fetcher.fetch(url)
-        console.log('html:', html)
         const companyDetail = await this._components.crawler.crawl(
           html,
           this._context?.driverConfig
