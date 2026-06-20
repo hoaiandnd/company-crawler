@@ -1,7 +1,9 @@
-import { DriverCrawler } from '@/drivers/hoptackinhdoanh.com/DriverCrawler.js'
-import { DriverFetcher } from '@/drivers/hoptackinhdoanh.com/DriverFetcher.js'
-import { DriverPaginator } from '@/drivers/hoptackinhdoanh.com/DriverPaginator.js'
-import { DriverValidator } from '@/drivers/hoptackinhdoanh.com/DriverValidator.js'
+import {
+  DriverCrawler,
+  DriverFetcher,
+  DriverPaginator,
+  DriverValidator
+} from '@/drivers/hoptackinhdoanh.com/index.js'
 import { DriverBase } from '@/providers/DriverBase.js'
 import { DriverConfigurationLoader } from '@/providers/DriverConfigurationLoader.js'
 import { DriverContext } from '@/providers/DriverContext.js'
@@ -28,7 +30,6 @@ app.post('/', async (req: Request, res: Response) => {
         fetcher: new DriverFetcher(),
         crawler: new DriverCrawler(),
         validator: new DriverValidator()
-        // configLoader: new DriverConfigurationLoader()
       },
       driverContext
     )
