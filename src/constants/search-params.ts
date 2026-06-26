@@ -1,3 +1,6 @@
 export const SearchParams = {
-  PAGE: 'page'
+  ID: 'id',
+  PAGE: 'page',
+  LANGUAGE: 'language',
+  TYPE: 'type'
 }

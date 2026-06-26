@@ -18,10 +18,11 @@ app.use(express.json())
 app.post('/', async (req: Request, res: Response) => {
   try {
     const crawlRequest = await parseRequest(req)
+    const configurationLoader = new DriverConfigurationLoader()
     //  truyền vào hàm tạo của driver - sử dụng xuyên suốt
     const driverContext = await DriverContext.create(
       crawlRequest,
-      new DriverConfigurationLoader()
+      configurationLoader
     )
 
     const driver = new DriverBase(
