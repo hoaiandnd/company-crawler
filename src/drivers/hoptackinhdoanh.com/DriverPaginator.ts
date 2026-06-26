@@ -85,16 +85,16 @@ export class DriverPaginator implements IDriverPaginator {
     const citySlug = new URL(url).pathname.split('/').pop()
     // không có city slug trong url
     if (!citySlug) throw new Error(ErrorMessage.ERR_NO_CITY_SLUG)
-    const provinceId = this._provinceSlugs.indexOf(citySlug)
+    const provinceIndex = this._provinceSlugs.indexOf(citySlug)
     // không có slug được đăng ký, kiểm tra lại `_provinceSlugs`
-    if (provinceId < 0) throw new Error(ErrorMessage.ERR_INVALID_CITY_SLUG)
+    if (provinceIndex < 0) throw new Error(ErrorMessage.ERR_INVALID_CITY_SLUG)
     const createPaginationInfo = (
       url: string,
       page: number
     ): PaginationInfo => {
       const urlObj = new URL(url)
       urlObj.searchParams.set(SearchParams.PAGE, `${page}`)
-      urlObj.searchParams.set(SearchParams.ID, `${provinceId}`)
+      urlObj.searchParams.set(SearchParams.ID, `${provinceIndex + 1}`)
       urlObj.searchParams.set(SearchParams.LANGUAGE, `vi`)
       urlObj.searchParams.set(SearchParams.TYPE, `company_province`)
       console.log(urlObj.toString())
