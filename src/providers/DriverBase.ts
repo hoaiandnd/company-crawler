@@ -38,7 +38,8 @@ export class DriverBase<
           companyDetail
         )
         return isValid ? companyDetail : null
-      } catch {
+      } catch (err) {
+        console.log((err as Error)?.message)
         console.log(`CANNOT FETCH '${url}'`)
         return null
       }
@@ -68,15 +69,13 @@ export class DriverBase<
       await waitRandom()
 
       const html = await fetcher.fetch(page.current.url)
-      console.log(JSON.parse(html))
+      // console.log(JSON.parse(html))
       const companyLinks = await crawler.crawlLinks(
         html,
         selectors?.companyLinks ?? ''
       )
 
       const companies = await this._setFetchQueue(companyLinks)
-
-      console.log('CRAWLED COMPANIES:', companies.length) // test
 
       const exporter = exporters?.find(e => e.canHandle(format))
       if (exporter) {
@@ -93,8 +92,9 @@ export class DriverBase<
         })
         transformedCompnanies.length = 0 // giải phóng bộ nhớ
       } else {
-        console.log('CRAWLED COMPANIES:', companies.length)
-        companies.forEach(company => console.log(company?.phone ?? 'NO PHONE'))
+        companies.forEach(company =>
+          console.log(JSON.stringify(company) ?? 'NO PHONE')
+        )
       }
       companies.length = 0 // giải phóng bộ nhớ cho mảng sau khi xuất dữ liệu
       await page.goNext()

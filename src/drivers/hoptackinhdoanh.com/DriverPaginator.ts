@@ -97,7 +97,6 @@ export class DriverPaginator implements IDriverPaginator {
       urlObj.searchParams.set(SearchParams.ID, `${provinceIndex + 1}`)
       urlObj.searchParams.set(SearchParams.LANGUAGE, `vi`)
       urlObj.searchParams.set(SearchParams.TYPE, `company_province`)
-      console.log(urlObj.toString())
       return {
         url: urlObj.toString(),
         page

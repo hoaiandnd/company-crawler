@@ -4,15 +4,13 @@ import { DriverConfig, IDriverCrawler } from '@/types/driver.js'
 import { HopTacKinhDoanhResponseSchema } from '@/types/json-schema.js'
 import { toObjectMap } from '@/utils/extractor.js'
 import * as cheerio from 'cheerio'
-import { writeFile } from 'fs/promises'
+// import { writeFile } from 'fs/promises'
 
 export class DriverCrawler implements IDriverCrawler<CompanyDetail> {
   async crawlLinks(jsonText: string, selector: string): Promise<string[]> {
-    await writeFile('./html.log.txt', jsonText, 'utf8')
+    // await writeFile('./html.log.txt', jsonText, 'utf8')
     if (!jsonText) throw new Error(ErrorMessage.ERR_HTML_EMPTY)
     if (!selector) throw new Error(ErrorMessage.ERR_SELECTOR_EMPTY)
-    const json = JSON.parse(jsonText)
-    console.log(`RESPONSE PARSE >>>> `, json?.content, json?.paginate)
     const jsonParseResult = HopTacKinhDoanhResponseSchema.safeParse(
       JSON.parse(jsonText)
     )
@@ -28,7 +26,7 @@ export class DriverCrawler implements IDriverCrawler<CompanyDetail> {
       const link = $('a').attr('href') ?? ''
       return `https://hoptackinhdoanh.com${link}`
     })
-    console.log('DriverCrawler:crawlLinks [Fn]: ', JSON.stringify(links))
+    // console.log('DriverCrawler:crawlLinks [Fn]: ', JSON.stringify(links))
     return links || []
   }
   crawl(
@@ -41,7 +39,7 @@ export class DriverCrawler implements IDriverCrawler<CompanyDetail> {
     if (!html) throw new Error(ErrorMessage.ERR_HTML_EMPTY)
     // console.log('Rev HTML >>>> ', html)
     const $ = cheerio.load(html)
-    console.log($(companySelectors.name).text() || 'NO_NAME')
+    // console.log($(companySelectors.name).text() || 'NO_NAME')
     const objectMap = toObjectMap(
       $,
       companySelectors,

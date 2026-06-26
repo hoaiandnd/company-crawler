@@ -8,14 +8,14 @@
   "selectors": {
     "companyLinks": "div.companyPage-business-list-item-code > h3",
     "companyDetail": {
-      "name": "companyDetailHeader h1",
-      "phone": "body > div.phone",
-      "taxCode": "body > div.taxCode",
-      "address": "body > div.address",
-      "founder": "body > div.founder",
-      "startDate": "body > div.startDate",
-      "email": "body > div.email",
-      "primaryBusiness": "body > div.primary-business"
+      "name": ".companyDetailHeader h1",
+      "phone": ".companyPhoneReveal",
+      "taxCode": ".companyDetail-info-value.taxCode-highlight",
+      "address": "div.companyDetailContent > div.companyDetail-info-grid > div:nth-child(2) > div:nth-child(3) > span.companyDetail-info-value",
+      "founder": "div.companyDetailContent > div.companyDetail-info-grid > div:nth-child(2) > div:nth-child(2) > span.companyDetail-info-value > strong",
+      "startDate": "div.companyDetailContent > div.companyDetail-info-grid > div:nth-child(1) > div:nth-child(5) > span.companyDetail-info-value",
+      "email": "div.companyDetailContent > div.companyDetail-info-grid > div:nth-child(2) > div:nth-child(5) > span.companyDetail-info-value > strong",
+      "primaryBusiness": ""
     }
   },
   "blackList": {

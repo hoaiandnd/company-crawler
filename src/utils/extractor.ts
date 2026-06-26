@@ -11,7 +11,8 @@ export const toTextMap = <TObject extends object, TKey extends keyof TObject>(
 ) => {
   return {
     get: (key: TKey) => {
-      if (!obj[key]) throw new Error(ErrorMessage.ERR_KEY_NOT_EXIST_IN_OBJECT)
+      if (!obj[key] && obj[key] !== '')
+        throw new Error(ErrorMessage.ERR_KEY_NOT_EXIST_IN_OBJECT)
       if (typeof obj[key] !== 'string')
         throw new Error(ErrorMessage.ERR_INVALID_SELECTOR)
       return $(obj[key]).text().trim()
