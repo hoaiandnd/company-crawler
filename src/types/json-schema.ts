@@ -58,3 +58,10 @@ export const DriverConfigSchema = z.object({
   selectors: SelectorSchema.optional(),
   blackList: BlackListSchema.optional()
 })
+export const HopTacKinhDoanhResponseSchema = z.object({
+  content: z
+    .object({
+      paginate: z.string().optional()
+    })
+    .catchall(z.string())
+})

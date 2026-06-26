@@ -68,6 +68,7 @@ export class DriverBase<
       await waitRandom()
 
       const html = await fetcher.fetch(page.current.url)
+      console.log(JSON.parse(html))
       const companyLinks = await crawler.crawlLinks(
         html,
         selectors?.companyLinks ?? ''

@@ -1,21 +1,35 @@
 import { ErrorMessage } from '@/constants/error.js'
 import { CompanyDetail } from '@/types/common.js'
 import { DriverConfig, IDriverCrawler } from '@/types/driver.js'
+import { HopTacKinhDoanhResponseSchema } from '@/types/json-schema.js'
 import { toObjectMap } from '@/utils/extractor.js'
 import * as cheerio from 'cheerio'
 import { writeFile } from 'fs/promises'
 
 export class DriverCrawler implements IDriverCrawler<CompanyDetail> {
-  async crawlLinks(html: string, selector: string): Promise<string[]> {
-    await writeFile('./html.log.txt', html, 'utf8')
-    if (!html) throw new Error(ErrorMessage.ERR_HTML_EMPTY)
+  async crawlLinks(jsonText: string, selector: string): Promise<string[]> {
+    await writeFile('./html.log.txt', jsonText, 'utf8')
+    if (!jsonText) throw new Error(ErrorMessage.ERR_HTML_EMPTY)
     if (!selector) throw new Error(ErrorMessage.ERR_SELECTOR_EMPTY)
-    const $ = cheerio.load(html)
-    const links = $(selector)
-      .map((_, el) => $(el).attr('href'))
-      .get()
-    console.log('DriverCrawler:crawlLinks [Fn]: ', links.length)
-    return links
+    const json = JSON.parse(jsonText)
+    console.log(`RESPONSE PARSE >>>> `, json?.content, json?.paginate)
+    const jsonParseResult = HopTacKinhDoanhResponseSchema.safeParse(
+      JSON.parse(jsonText)
+    )
+    if (!jsonParseResult.success) {
+      console.log(
+        'RESPONSE PARSE ERROR MESSAGE',
+        jsonParseResult.error?.message
+      )
+      throw new Error(ErrorMessage.ERR_REPONSE_CANNOT_PARSE)
+    }
+    const links = Object.values(jsonParseResult.data.content).map(html => {
+      const $ = cheerio.load(html)
+      const link = $('a').attr('href') ?? ''
+      return `https://hoptackinhdoanh.com${link}`
+    })
+    console.log('DriverCrawler:crawlLinks [Fn]: ', JSON.stringify(links))
+    return links || []
   }
   crawl(
     html: string,
@@ -25,7 +39,9 @@ export class DriverCrawler implements IDriverCrawler<CompanyDetail> {
     if (!companySelectors)
       throw new Error(ErrorMessage.ERR_SELECTOR_COMPANY_DETAIL_EMPTY)
     if (!html) throw new Error(ErrorMessage.ERR_HTML_EMPTY)
+    // console.log('Rev HTML >>>> ', html)
     const $ = cheerio.load(html)
+    console.log($(companySelectors.name).text() || 'NO_NAME')
     const objectMap = toObjectMap(
       $,
       companySelectors,
@@ -38,10 +54,10 @@ export class DriverCrawler implements IDriverCrawler<CompanyDetail> {
       'primaryBusiness',
       'startDate'
     )
-    console.log(objectMap['name'])
     return {
       ...objectMap,
-      phone: $(companySelectors.phone).attr('data-phone-full') ?? ''
+      phone:
+        $(companySelectors.phone).attr('data-phone-full') ?? '[NO_PHONE_FOUND]'
     }
   }
 }
