@@ -1,9 +1,4 @@
-import {
-  DriverCrawler,
-  DriverFetcher,
-  DriverPaginator,
-  DriverValidator
-} from '@/drivers/hoptackinhdoanh.com/index.js'
+import * as hopTacKinhDoanh from '@/drivers/hoptackinhdoanh.com/index.js'
 import { DriverBase } from '@/providers/DriverBase.js'
 import { DriverConfigurationLoader } from '@/providers/DriverConfigurationLoader.js'
 import { DriverContext } from '@/providers/DriverContext.js'
@@ -28,19 +23,19 @@ app.post('/', async (req: Request, res: Response) => {
 
     const driver = new DriverBase(
       {
-        paginator: new DriverPaginator(),
-        fetcher: new DriverFetcher(),
-        crawler: new DriverCrawler(),
-        validator: new DriverValidator(),
+        paginator: new hopTacKinhDoanh.DriverPaginator(),
+        fetcher: new hopTacKinhDoanh.DriverFetcher(),
+        crawler: new hopTacKinhDoanh.DriverCrawler(),
+        validator: new hopTacKinhDoanh.DriverValidator(),
         exporters: [new TextExporter()]
       },
       driverContext
     )
-    await driver._run({
+    const { isFinish, lastPage } = await driver._run({
       fileName: 'test-sai-gon',
       transformFn: select('name', 'phone', 'address')
     })
-    console.log('CRAWL FINISH')
+    console.log(isFinish ? 'CRAWL FINISH' : `LAST PAGE: ${lastPage}`)
     res.status(200).json({ message: 'CRAWL_SUCCESS' })
   } catch (error) {
     res.status(400).json({
