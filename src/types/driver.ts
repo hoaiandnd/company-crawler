@@ -47,13 +47,15 @@ export type ExportOptions<TData> = {
 }
 
 export type PaginationInfo = {
-  url: string // url đến trang được chỉ định - có thể sử dụng ngay
+  url: URL // url đến trang được chỉ định - có thể sử dụng ngay
   page: number // chỉ số trang được xét - đồng bộ với `url`
 }
 export type PaginationResult = {
   current: PaginationInfo // trang hiện tại - dùng trực tiếp để fetch
   next: PaginationInfo // trang tiếp theo - dùng khi kết thúc fetch
-  goNext: () => void | Promise<void> // thay đổi `current` và `next` của object hiện tại
+  // goNext: () =>
+  //   | { current: PaginationInfo; next: PaginationInfo }
+  //   | Promise<{ current: PaginationInfo; next: PaginationInfo }> // thay đổi `current` và `next` của object hiện tại
 }
 
 export type DriverComponent<TCrawlData, TFetchOptions> = {
@@ -67,6 +69,7 @@ export type DriverComponent<TCrawlData, TFetchOptions> = {
 
 export interface IDriverPaginator {
   paginate(context: DriverContext): PaginationResult | Promise<PaginationResult>
+  goNext(page: PaginationResult): PaginationResult | Promise<PaginationResult>
 }
 
 export interface IDriverFetcher<TFetchOptions = RequestInit> {
@@ -87,5 +90,8 @@ export interface IDriverValidator<T> {
 export type DriverExporterOptions<T> = Omit<ExportOptions<T>, 'transformFn'>
 export interface IDriverExporter {
   canHandle(format: string): boolean
-  export<T = any>(data: T[], options?: DriverExporterOptions<T>): void | Promise<void>
+  export<T = any>(
+    data: T[],
+    options?: DriverExporterOptions<T>
+  ): void | Promise<void>
 }

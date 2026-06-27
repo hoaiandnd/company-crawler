@@ -16,7 +16,14 @@ export class TextExporter implements IDriverExporter {
     options?: DriverExporterOptions<T>
   ): Promise<void> {
     const fileName = options?.fileName || Date.now()
-    const text = data.map(item => JSON.stringify(item))
+    const text = data.map(item => {
+      if (typeof item === 'object' && item !== null) {
+        const objectKeys = Object.keys(item) as (keyof T)[]
+        let objectString = ''
+        const values = objectKeys.map(key => item[key])
+        return values.join(',')
+      }
+    })
     const fullPath = path.join(
       __dirname,
       '..',
@@ -24,7 +31,7 @@ export class TextExporter implements IDriverExporter {
       'exporters',
       `${fileName}.txt`
     )
-    await writeFile(fullPath, text, {
+    await writeFile(fullPath, JSON.stringify(text), {
       encoding: 'utf-8',
       mode: 0o777
     })

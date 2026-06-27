@@ -98,7 +98,7 @@ export class DriverPaginator implements IDriverPaginator {
       urlObj.searchParams.set(SearchParams.LANGUAGE, `vi`)
       urlObj.searchParams.set(SearchParams.TYPE, `company_province`)
       return {
-        url: urlObj.toString(),
+        url: urlObj,
         page
       }
     }
@@ -106,10 +106,26 @@ export class DriverPaginator implements IDriverPaginator {
     let next = createPaginationInfo(loadUrl, startPage + 1)
     return {
       current,
-      next,
-      goNext() {
-        ;((current = { ...next }),
-          (next = createPaginationInfo(loadUrl, current.page + 1)))
+      next
+    }
+  }
+  goNext(page: PaginationResult): PaginationResult {
+    const newCurrentUrl = page.current.url
+    newCurrentUrl.searchParams.set(
+      SearchParams.PAGE,
+      `${page.current.page + 1}`
+    )
+    const newNextUrl = page.next.url
+    newNextUrl.searchParams.set(SearchParams.PAGE, `${page.next.page + 1}`)
+    return {
+      ...page,
+      current: {
+        url: newCurrentUrl,
+        page: page.current.page + 1
+      },
+      next: {
+        url: newNextUrl,
+        page: page.next.page + 1
       }
     }
   }

@@ -60,15 +60,14 @@ export class DriverBase<
     }
     // load and save driver configurations
     let limit = filters?.limit && filters.limit > 0 ? filters.limit : crawlLimit
-    const page = await paginator.paginate(this._context)
+    let page = await paginator.paginate(this._context)
     const format = exportFormat ?? 'csv'
     const exportedFileName =
       exportOptions?.fileName ??
       `${crawlDomain}_${Date.now()}.${format.replace(/^\./, '')}`
     while (limit >= 0) {
       await waitRandom()
-
-      const html = await fetcher.fetch(page.current.url)
+      const html = await fetcher.fetch(page.current.url.toString())
       // console.log(JSON.parse(html))
       const companyLinks = await crawler.crawlLinks(
         html,
@@ -97,7 +96,7 @@ export class DriverBase<
         )
       }
       companies.length = 0 // giải phóng bộ nhớ cho mảng sau khi xuất dữ liệu
-      await page.goNext()
+      page = await paginator.goNext(page)
       limit--
     }
     if (limit < 0) {

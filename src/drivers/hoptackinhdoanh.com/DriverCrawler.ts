@@ -8,7 +8,6 @@ import * as cheerio from 'cheerio'
 
 export class DriverCrawler implements IDriverCrawler<CompanyDetail> {
   async crawlLinks(jsonText: string, selector: string): Promise<string[]> {
-    // await writeFile('./html.log.txt', jsonText, 'utf8')
     if (!jsonText) throw new Error(ErrorMessage.ERR_HTML_EMPTY)
     if (!selector) throw new Error(ErrorMessage.ERR_SELECTOR_EMPTY)
     const jsonParseResult = HopTacKinhDoanhResponseSchema.safeParse(

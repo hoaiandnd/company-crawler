@@ -32,7 +32,7 @@ app.post('/', async (req: Request, res: Response) => {
         fetcher: new DriverFetcher(),
         crawler: new DriverCrawler(),
         validator: new DriverValidator(),
-        exporters: [new TextExporter()]
+        // exporters: [new TextExporter()]
       },
       driverContext
     )
