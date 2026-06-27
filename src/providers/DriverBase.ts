@@ -63,7 +63,7 @@ export class DriverBase<
     let page = await paginator.paginate(this._context)
     const format = exportFormat ?? 'csv'
     const exportedFileName =
-      exportOptions?.fileName ??
+      exportOptions?.fileName ||
       `${crawlDomain}_${Date.now()}.${format.replace(/^\./, '')}`
     while (limit >= 0) {
       await waitRandom()

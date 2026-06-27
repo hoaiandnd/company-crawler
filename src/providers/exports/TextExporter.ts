@@ -9,7 +9,7 @@ const __dirname = path.dirname(__filename)
 
 export class TextExporter implements IDriverExporter {
   canHandle(format: string): boolean {
-    return ['txt', '.txt'].includes(format)
+    return format === 'txt'
   }
   async export<T = any>(
     data: T[],
