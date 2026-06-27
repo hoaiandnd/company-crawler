@@ -42,7 +42,7 @@ type FileMode = 'append' | 'create'
 export type ExportOptions<TData> = {
   fileName?: string
   mode?: FileMode
-  transformFn?: <TTransformedData>(data: TData) => TTransformedData
+  transformFn?: (data: TData) => unknown
   // các thuộc tính cấu hình khác - phát triển sau
 }
 

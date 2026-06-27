@@ -7,7 +7,7 @@ import {
 import { DriverBase } from '@/providers/DriverBase.js'
 import { DriverConfigurationLoader } from '@/providers/DriverConfigurationLoader.js'
 import { DriverContext } from '@/providers/DriverContext.js'
-import { parseRequest } from '@/utils/builder.js'
+import { parseRequest, select } from '@/utils/builder.js'
 import express, { Request, Response } from 'express'
 import { TextExporter } from './providers/exports/TextExporter.js'
 
@@ -37,7 +37,8 @@ app.post('/', async (req: Request, res: Response) => {
       driverContext
     )
     await driver._run({
-      fileName: 'test-sai-gon'
+      fileName: 'test-sai-gon',
+      transformFn: select('name', 'phone', 'address')
     })
     console.log('CRAWL FINISH')
     res.status(200).json({ message: 'CRAWL_SUCCESS' })
