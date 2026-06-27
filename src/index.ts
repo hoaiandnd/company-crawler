@@ -5,6 +5,7 @@ import { DriverContext } from '@/providers/DriverContext.js'
 import { parseRequest, select } from '@/utils/builder.js'
 import express, { Request, Response } from 'express'
 import { TextExporter } from './providers/exports/TextExporter.js'
+import { ExcelExporter } from './providers/exports/ExcelExporter.js'
 
 const app = express()
 const PORT = 3000
@@ -27,12 +28,12 @@ app.post('/', async (req: Request, res: Response) => {
         fetcher: new hopTacKinhDoanh.DriverFetcher(),
         crawler: new hopTacKinhDoanh.DriverCrawler(),
         validator: new hopTacKinhDoanh.DriverValidator(),
-        exporters: [new TextExporter()]
+        exporters: [new TextExporter(), new ExcelExporter()]
       },
       driverContext
     )
     const { isFinish, lastPage } = await driver._run({
-      fileName: 'test-sai-gon',
+      fileName: 'test-sai-gon.xlsx',
       transformFn: select('name', 'phone', 'address')
     })
     console.log(isFinish ? 'CRAWL FINISH' : `LAST PAGE: ${lastPage}`)

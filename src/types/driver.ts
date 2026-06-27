@@ -94,4 +94,5 @@ export interface IDriverExporter {
     data: T[],
     options?: DriverExporterOptions<T>
   ): void | Promise<void>
+  close(): void | Promise<void>
 }

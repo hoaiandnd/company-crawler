@@ -17,7 +17,7 @@ const CrawlFilterSchema = z.object({
 
 export const CrawlRequestSchema = z.object({
   url: z.url(),
-  exportFormat: ExportFormatSchema.optional().default('txt'),
+  exportFormat: ExportFormatSchema.optional().default('xlsx'),
   filters: CrawlFilterSchema.optional()
 })
 const OptionalString = z.string().optional().default('')

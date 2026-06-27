@@ -65,6 +65,7 @@ export class DriverBase<
     const exportedFileName =
       exportOptions?.fileName ||
       `${crawlDomain}_${Date.now()}.${format.replace(/^\./, '')}`
+    const exporter = exporters?.find(e => e.canHandle(format))
     while (limit >= 0) {
       await waitRandom()
       const html = await fetcher.fetch(page.current.url.toString())
@@ -76,7 +77,6 @@ export class DriverBase<
 
       const companies = await this._setFetchQueue(companyLinks)
 
-      const exporter = exporters?.find(e => e.canHandle(format))
       if (exporter) {
         const transformFn = exportOptions?.transformFn ?? (data => data) // nếu không có transformFn, sử dụng hàm mặc định trả về dữ liệu gốc
         const transformedCompnanies = []
@@ -100,6 +100,7 @@ export class DriverBase<
       page = await paginator.goNext(page)
       limit--
     }
+    await exporter?.close()
     if (limit < 0) {
       return {
         isFinish: true,

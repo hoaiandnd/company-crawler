@@ -37,4 +37,5 @@ export class TextExporter implements IDriverExporter {
       flag: 'a'
     })
   }
+  close() {}
 }
