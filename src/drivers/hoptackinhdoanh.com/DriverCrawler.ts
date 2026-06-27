@@ -26,7 +26,6 @@ export class DriverCrawler implements IDriverCrawler<CompanyDetail> {
       const link = $('a').attr('href') ?? ''
       return `https://hoptackinhdoanh.com${link}`
     })
-    // console.log('DriverCrawler:crawlLinks [Fn]: ', JSON.stringify(links))
     return links || []
   }
   crawl(
@@ -37,16 +36,14 @@ export class DriverCrawler implements IDriverCrawler<CompanyDetail> {
     if (!companySelectors)
       throw new Error(ErrorMessage.ERR_SELECTOR_COMPANY_DETAIL_EMPTY)
     if (!html) throw new Error(ErrorMessage.ERR_HTML_EMPTY)
-    // console.log('Rev HTML >>>> ', html)
     const $ = cheerio.load(html)
-    // console.log($(companySelectors.name).text() || 'NO_NAME')
     const objectMap = toObjectMap(
       $,
       companySelectors,
       'name',
       'address',
       // 'phone',
-      'email',
+      // 'email',
       'taxCode',
       'founder',
       'primaryBusiness',
@@ -54,8 +51,8 @@ export class DriverCrawler implements IDriverCrawler<CompanyDetail> {
     )
     return {
       ...objectMap,
-      phone:
-        $(companySelectors.phone).attr('data-phone-full') ?? '[NO_PHONE_FOUND]'
+      phone: $(companySelectors.phone).attr('data-phone-full') ?? '',
+      email: $(companySelectors.email).attr('data-email-full') ?? ''
     }
   }
 }

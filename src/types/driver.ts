@@ -86,6 +86,6 @@ export interface IDriverValidator<T> {
 
 export type DriverExporterOptions<T> = Omit<ExportOptions<T>, 'transformFn'>
 export interface IDriverExporter {
-  canHandle: (format: string) => boolean
-  export: <T = any>(data: T[], options?: DriverExporterOptions<T>) => void | Promise<void>
+  canHandle(format: string): boolean
+  export<T = any>(data: T[], options?: DriverExporterOptions<T>): void | Promise<void>
 }

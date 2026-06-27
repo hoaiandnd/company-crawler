@@ -14,7 +14,7 @@
       "address": "div.companyDetailContent > div.companyDetail-info-grid > div:nth-child(2) > div:nth-child(3) > span.companyDetail-info-value",
       "founder": "div.companyDetailContent > div.companyDetail-info-grid > div:nth-child(2) > div:nth-child(2) > span.companyDetail-info-value > strong",
       "startDate": "div.companyDetailContent > div.companyDetail-info-grid > div:nth-child(1) > div:nth-child(5) > span.companyDetail-info-value",
-      "email": "div.companyDetailContent > div.companyDetail-info-grid > div:nth-child(2) > div:nth-child(5) > span.companyDetail-info-value > strong",
+      "email": ".companyEmailReveal",
       "primaryBusiness": ""
     }
   },

@@ -9,6 +9,7 @@ import { DriverConfigurationLoader } from '@/providers/DriverConfigurationLoader
 import { DriverContext } from '@/providers/DriverContext.js'
 import { parseRequest } from '@/utils/builder.js'
 import express, { Request, Response } from 'express'
+import { TextExporter } from './providers/exports/TextExporter.js'
 
 const app = express()
 const PORT = 3000
@@ -30,11 +31,14 @@ app.post('/', async (req: Request, res: Response) => {
         paginator: new DriverPaginator(),
         fetcher: new DriverFetcher(),
         crawler: new DriverCrawler(),
-        validator: new DriverValidator()
+        validator: new DriverValidator(),
+        exporters: [new TextExporter()]
       },
       driverContext
     )
-    await driver._run()
+    await driver._run({
+      fileName: 'test-sai-gon'
+    })
     res.status(200).json({ message: 'CRAWL_SUCCESS' })
   } catch (error) {
     res.status(400).json({
