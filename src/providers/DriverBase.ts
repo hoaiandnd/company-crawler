@@ -91,9 +91,10 @@ export class DriverBase<
         })
         transformedCompnanies.length = 0 // giải phóng bộ nhớ
       } else {
-        companies.forEach(company =>
-          console.log(JSON.stringify(company) ?? 'NO PHONE')
-        )
+        // companies.forEach(company =>
+        //   console.log(JSON.stringify(company) ?? 'NO PHONE')
+        // )
+        console.log(`>> COMPANIES LENGTH: `)
       }
       companies.length = 0 // giải phóng bộ nhớ cho mảng sau khi xuất dữ liệu
       page = await paginator.goNext(page)

@@ -21,7 +21,8 @@ export class TextExporter implements IDriverExporter {
         const objectKeys = Object.keys(item) as (keyof T)[]
         let objectString = ''
         const values = objectKeys.map(key => item[key])
-        return values.join(',')
+        const line = values.join(',')
+        return line + '\n'
       }
     })
     const fullPath = path.join(
@@ -31,9 +32,10 @@ export class TextExporter implements IDriverExporter {
       'exporters',
       `${fileName}.txt`
     )
-    await writeFile(fullPath, JSON.stringify(text), {
+    await writeFile(fullPath, text.toString(), {
       encoding: 'utf-8',
-      mode: 0o777
+      mode: 0o777,
+      flag: 'a'
     })
   }
 }

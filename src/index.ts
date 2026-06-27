@@ -32,13 +32,14 @@ app.post('/', async (req: Request, res: Response) => {
         fetcher: new DriverFetcher(),
         crawler: new DriverCrawler(),
         validator: new DriverValidator(),
-        // exporters: [new TextExporter()]
+        exporters: [new TextExporter()]
       },
       driverContext
     )
     await driver._run({
       fileName: 'test-sai-gon'
     })
+    console.log('CRAWL FINISH')
     res.status(200).json({ message: 'CRAWL_SUCCESS' })
   } catch (error) {
     res.status(400).json({

@@ -48,10 +48,12 @@ export class DriverCrawler implements IDriverCrawler<CompanyDetail> {
       'primaryBusiness',
       'startDate'
     )
-    return {
+    const result = {
       ...objectMap,
       phone: $(companySelectors.phone).attr('data-phone-full') ?? '',
       email: $(companySelectors.email).attr('data-email-full') ?? ''
     }
+    console.log(`> CRAWLED ${result.name}`)
+    return result
   }
 }

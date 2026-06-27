@@ -2,7 +2,7 @@
   "name": "Page name",
   "domain": "hoptackinhdoanh.com",
   "supportedExportFormats": ["docx", "csv"],
-  "crawlLimit": 10,
+  "crawlLimit": 5,
   "concurrencyRequestLimit": 5,
   "dateFormat": "YYYY-MM-DD",
   "selectors": {
