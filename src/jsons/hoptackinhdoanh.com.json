@@ -1,10 +1,10 @@
 {
   "name": "Page name",
   "domain": "hoptackinhdoanh.com",
-  "supportedExportFormats": ["docx", "csv"],
+  "supportedExportFormats": ["docx", "csv", "xlsx", "txt"],
   "crawlLimit": 5,
   "concurrencyRequestLimit": 5,
-  "dateFormat": "YYYY-MM-DD",
+  "dateFormat": "DD/MM/YYYY",
   "selectors": {
     "companyLinks": "div.companyPage-business-list-item-code > h3",
     "companyDetail": {
@@ -20,7 +20,16 @@
   },
   "blackList": {
     "name": {
-      "rules": ["chi nhánh", "văn phòng đại diện", "Ủy ban", "ubnd", "công an", "massage", "ntnn", "nộp hộ"],
+      "rules": [
+        "chi nhánh",
+        "văn phòng đại diện",
+        "Ủy ban",
+        "ubnd",
+        "công an",
+        "massage",
+        "ntnn",
+        "nộp hộ"
+      ],
       "validateType": "includes",
       "ignoreCase": true
     },
