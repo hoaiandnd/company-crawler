@@ -1,12 +1,18 @@
+import { DriverBlackListValidator } from '@/providers/DriverBlackListValidator.js'
 import { CompanyDetail } from '@/types/common.js'
 import { DriverContext, IDriverValidator } from '@/types/driver.js'
 
-export class DriverValidator implements IDriverValidator<CompanyDetail> {
-  validate(
-    _context: DriverContext,
-    data: CompanyDetail
-  ): boolean | Promise<boolean> {
+export class DriverValidator
+  extends DriverBlackListValidator<CompanyDetail>
+  implements IDriverValidator<CompanyDetail>
+{
+  validate(_context: DriverContext, data: CompanyDetail): boolean | Promise<boolean> {
     if (!data) return false
+    const isBlackListed = this.isInBlackkList(_context, data)
+    if (isBlackListed) {
+      console.log(`>>> [BLACK LIST DETECT]`, data.name)
+      return false
+    }
     const { phone } = data
     if (!phone) {
       console.log(`!!!!! Company ${data.name} has no phone number`)

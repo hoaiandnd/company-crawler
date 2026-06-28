@@ -20,14 +20,7 @@
   },
   "blackList": {
     "name": {
-      "rules": [
-        "văn phòng đại diện",
-        "Ủy ban",
-        "ubnd",
-        "công an",
-        "massage",
-        "ntnn"
-      ],
+      "rules": ["chi nhánh", "văn phòng đại diện", "Ủy ban", "ubnd", "công an", "massage", "ntnn", "nộp hộ"],
       "validateType": "includes",
       "ignoreCase": true
     },
