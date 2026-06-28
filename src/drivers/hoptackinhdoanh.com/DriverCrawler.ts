@@ -53,7 +53,7 @@ export class DriverCrawler implements IDriverCrawler<CompanyDetail> {
       phone: $(companySelectors.phone).attr('data-phone-full') ?? '',
       email: $(companySelectors.email).attr('data-email-full') ?? ''
     }
-    console.log(`> CRAWLED ${result.name}`)
+    console.log(`> CRAWLED ${result.name} - ${result.phone}`)
     return result
   }
 }

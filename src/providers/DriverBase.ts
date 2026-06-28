@@ -2,7 +2,7 @@ import pLimit from 'p-limit'
 
 import { CrawlResult, DriverComponent, ExportOptions } from '@/types/driver.js'
 import { getDomainFromUrl } from '@/utils/extractor.js'
-import { waitRandom } from '@/utils/function.js'
+import { isNotNullable, waitRandom } from '@/utils/function.js'
 import { DriverContext } from '@/providers/DriverContext.js'
 import { ErrorMessage } from '@/constants/error.js'
 
@@ -59,7 +59,21 @@ export class DriverBase<
       throw new Error(ErrorMessage.ERR_INVALID_REQUEST)
     }
     // load and save driver configurations
-    let limit = filters?.limit && filters.limit > 0 ? filters.limit : crawlLimit
+    const getCrawlLimit = () => {
+      // trường hợp không có filter trên request thì lấy thông tin từ file cấu hình
+      if (!filters) return crawlLimit
+      // nếu có thông tin về trang bắt đầu
+      if (isNotNullable(filters.page?.from) && filters.page.from > 0) {
+        // nếu có thông tin trang cuối trùng (thông tin hợp lệ)
+        if (
+          isNotNullable(filters.page?.to) &&
+          filters.page.to > filters.page.from
+        )
+          return filters.page?.to - filters.page?.from
+      }
+      return filters?.limit && filters.limit > 0 ? filters.limit : crawlLimit
+    }
+    let limit = getCrawlLimit()
     let page = await paginator.paginate(this._context)
     const format = exportFormat ?? 'csv'
     const exportedFileName =
