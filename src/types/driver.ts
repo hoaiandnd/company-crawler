@@ -94,5 +94,6 @@ export interface IDriverExporter {
     data: T[],
     options?: DriverExporterOptions<T>
   ): void | Promise<void>
+  // một số trình ghi file phải có thao tác đóng luồng hoặc tương tự, hãy định nghĩa trong phương thức `close()`.
   close(): void | Promise<void>
 }

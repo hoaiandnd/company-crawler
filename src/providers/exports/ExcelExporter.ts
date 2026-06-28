@@ -43,8 +43,6 @@ export class ExcelExporter implements IDriverExporter {
       `${fileName}`
     )
     this.ensureInitWorkbook(fullPath, data[0])
-    console.log('ExcelExporter log data >>> ', JSON.stringify(data))
-    // this._worksheet!.addRow(Object.values(data)).commit()
     for (const row of data) {
       this._worksheet!.addRow(row).commit()
     }
