@@ -79,6 +79,7 @@ export class DriverBase<
       `${crawlDomain}_${Date.now()}.${format.replace(/^\./, '')}`
     const exporter = exporters?.find(e => e.canHandle(format))
     while (limit >= 0) {
+      console.log(`\n>>> START CRAWLING PAGE ${page.current.page}`)
       await waitRandom()
       const html = await fetcher.fetch(page.current.url.toString())
       // console.log(JSON.parse(html))
@@ -106,8 +107,9 @@ export class DriverBase<
         // companies.forEach(company =>
         //   console.log(JSON.stringify(company) ?? 'NO PHONE')
         // )
-        console.log(`>> COMPANIES LENGTH: `)
+        console.log(`>> COMPANIES LENGTH: `, companies.length)
       }
+      console.log(`\n>>> FINISH CRAWLING PAGE ${page.current.page}`)
       companies.length = 0 // giải phóng bộ nhớ cho mảng sau khi xuất dữ liệu
       page = await paginator.goNext(page)
       limit--
