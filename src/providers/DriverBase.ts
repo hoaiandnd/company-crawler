@@ -59,23 +59,21 @@ export class DriverBase<
       throw new Error(ErrorMessage.ERR_INVALID_REQUEST)
     }
     // load and save driver configurations
+    let page = await paginator.paginate(this._context)
     const getCrawlLimit = () => {
       // trường hợp không có filter trên request thì lấy thông tin từ file cấu hình
       if (!filters) return crawlLimit
-      // nếu có thông tin về trang bắt đầu
-      if (isNotNullable(filters.page?.from) && filters.page.from > 0) {
-        // nếu có thông tin trang cuối trùng (thông tin hợp lệ)
-        if (
-          isNotNullable(filters.page?.to) &&
-          filters.page.to > filters.page.from
-        )
-          return filters.page?.to - filters.page?.from
+      if (isNotNullable(filters.page?.to) && filters.page?.to > 0) {
+        const from =
+          isNotNullable(filters.page?.from) && filters.page.from > 0
+            ? filters.page?.from
+            : page.current.page
+        if (filters.page?.to > from) return filters.page?.to - from
       }
       return filters?.limit && filters.limit > 0 ? filters.limit : crawlLimit
     }
     let limit = getCrawlLimit()
-    let page = await paginator.paginate(this._context)
-    const format = exportFormat ?? 'csv'
+    const format = exportFormat || 'xlsx'
     const exportedFileName =
       exportOptions?.fileName ||
       `${crawlDomain}_${Date.now()}.${format.replace(/^\./, '')}`
