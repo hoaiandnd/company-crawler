@@ -17,10 +17,7 @@ app.post('/', async (req: Request, res: Response) => {
     const crawlRequest = await parseRequest(req)
     const configurationLoader = new DriverConfigurationLoader()
     //  truyền vào hàm tạo của driver - sử dụng xuyên suốt
-    const driverContext = await DriverContext.create(
-      crawlRequest,
-      configurationLoader
-    )
+    const driverContext = await DriverContext.create(crawlRequest, configurationLoader)
 
     const driver = new DriverBase(
       {
@@ -33,8 +30,8 @@ app.post('/', async (req: Request, res: Response) => {
       driverContext
     )
     const { isFinish, lastPage } = await driver._run({
-      fileName: 'test-sai-gon-10-25.xlsx',
-      transformFn: select('name', 'phone', 'address')
+      fileName: 'test-sai-gon-200-210.xlsx',
+      transformFn: select('name', 'phone')
     })
     console.log(isFinish ? 'CRAWL FINISH' : `LAST PAGE: ${lastPage}`)
     res.status(200).json({ message: 'CRAWL_SUCCESS' })
