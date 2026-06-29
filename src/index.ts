@@ -30,8 +30,8 @@ app.post('/', async (req: Request, res: Response) => {
       driverContext
     )
     const { isFinish, lastPage } = await driver._run({
-      fileName: 'test-sai-gon-200-210.xlsx',
-      transformFn: select('name', 'phone')
+      fileName: 'test-sai-gon-500-515.txt',
+      transformFn: select('name', 'taxCode', 'phone', 'address')
     })
     console.log(isFinish ? 'CRAWL FINISH' : `LAST PAGE: ${lastPage}`)
     res.status(200).json({ message: 'CRAWL_SUCCESS' })

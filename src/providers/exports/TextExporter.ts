@@ -24,7 +24,7 @@ export class TextExporter implements IDriverExporter {
     const fullPath = path.join(__dirname, '..', '..', 'exporters', `${fileName}.txt`)
     await writeFile(fullPath, text.toString(), {
       encoding: 'utf-8',
-      mode: 0o777,
+      // mode: 0o777,
       flag: 'a'
     })
   }

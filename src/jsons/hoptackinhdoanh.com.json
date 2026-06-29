@@ -28,7 +28,8 @@
         "công an",
         "massage",
         "ntnn",
-        "nộp hộ"
+        "nộp hộ",
+        "phần mềm"
       ],
       "validateType": "includes",
       "ignoreCase": true
@@ -36,6 +37,11 @@
     "phone": {
       "rules": ["02"],
       "validateType": "startsWith",
+      "ignoreCase": true
+    },
+    "address": {
+      "rules": ["vũng tàu"],
+      "validateType": "includes",
       "ignoreCase": true
     }
   }
