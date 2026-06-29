@@ -11,26 +11,17 @@ export class TextExporter implements IDriverExporter {
   canHandle(format: string): boolean {
     return format === 'txt'
   }
-  async export<T = any>(
-    data: T[],
-    options?: DriverExporterOptions<T>
-  ): Promise<void> {
+  async export<T = any>(data: T[], options?: DriverExporterOptions<T>): Promise<void> {
     const fileName = options?.fileName || Date.now()
     const text = data.map(item => {
       if (typeof item === 'object' && item !== null) {
         const objectKeys = Object.keys(item) as (keyof T)[]
         const values = objectKeys.map(key => item[key])
-        const line = values.join(',')
+        const line = values.join('\n')
         return line + '\n'
       }
     })
-    const fullPath = path.join(
-      __dirname,
-      '..',
-      '..',
-      'exporters',
-      `${fileName}.txt`
-    )
+    const fullPath = path.join(__dirname, '..', '..', 'exporters', `${fileName}.txt`)
     await writeFile(fullPath, text.toString(), {
       encoding: 'utf-8',
       mode: 0o777,

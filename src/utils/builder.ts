@@ -22,3 +22,13 @@ export const select = <TKey extends keyof CompanyDetail>(...keys: TKey[]) => {
     )
   }
 }
+
+export function selectAllExcept<TKey extends keyof CompanyDetail>(...keys: readonly TKey[]) {
+  return function (data: CompanyDetail) {
+    const removeSet = new Set(keys)
+    return Object.fromEntries(Object.entries(data).filter(([key]) => !removeSet.has(key as TKey))) as Omit<
+      CompanyDetail,
+      TKey
+    >
+  }
+}
