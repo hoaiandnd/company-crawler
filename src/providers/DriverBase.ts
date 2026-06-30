@@ -5,6 +5,7 @@ import { getDomainFromUrl, getFileExtension } from '@/utils/extractor.js'
 import { isNotNullable, waitRandom } from '@/utils/function.js'
 import { DriverContext } from '@/providers/DriverContext.js'
 import { ErrorMessage } from '@/constants/error.js'
+import { Defaults } from '@/constants/default.js'
 
 type LimitPage = number
 type FromPage = number | undefined
@@ -50,14 +51,13 @@ export class DriverBase<TCrawlData extends { phone: string }, TFetchOptions = Re
     let page = await paginator.paginate(this._context)
     const getCrawlLimit = (): readonly [LimitPage, FromPage, ToPage] => {
       // trường hợp không có filter trên request thì lấy thông tin từ file cấu hình
-      const DEFAULT_FROM_PAGE = 1
-      if (!filters) return [crawlLimit, DEFAULT_FROM_PAGE, DEFAULT_FROM_PAGE + crawlLimit]
+      if (!filters) return [crawlLimit, Defaults.START_PAGE, Defaults.START_PAGE + crawlLimit]
       if (isNotNullable(filters.page?.to) && filters.page?.to > 0) {
         const from = isNotNullable(filters.page?.from) && filters.page.from > 0 ? filters.page?.from : page.current.page
         if (filters.page?.to > from) return [filters.page?.to - from, from, filters.page?.to]
       }
       const limit = filters?.limit && filters.limit > 0 ? filters.limit : crawlLimit
-      return [limit, DEFAULT_FROM_PAGE, DEFAULT_FROM_PAGE + limit]
+      return [limit, Defaults.START_PAGE, Defaults.START_PAGE + limit]
     }
     let [limit, from, to] = getCrawlLimit()
     const format = exportFormat || getFileExtension(exportOptions?.fileName ?? '')
@@ -69,7 +69,7 @@ export class DriverBase<TCrawlData extends { phone: string }, TFetchOptions = Re
     const exporter = exporters?.find(e => e.canHandle(format))
     // có format nhưng lại không có exporter tương ứng hỗ trợ
     if (format && !exporter) {
-      console.log('NO SUPPORTED FORMAT FOR ', format.toUpperCase())
+      console.log(`>>> FORMAT ${format.toUpperCase()} IS NOT SUPPORTED`)
     }
     while (limit >= 0) {
       console.log(`\n>>> START CRAWLING PAGE ${page.current.page}`)
