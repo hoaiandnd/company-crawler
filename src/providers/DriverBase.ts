@@ -50,13 +50,14 @@ export class DriverBase<TCrawlData extends { phone: string }, TFetchOptions = Re
     let page = await paginator.paginate(this._context)
     const getCrawlLimit = (): readonly [LimitPage, FromPage, ToPage] => {
       // trường hợp không có filter trên request thì lấy thông tin từ file cấu hình
-      if (!filters) return [crawlLimit, 1, 1 + crawlLimit]
+      const DEFAULT_FROM_PAGE = 1
+      if (!filters) return [crawlLimit, DEFAULT_FROM_PAGE, DEFAULT_FROM_PAGE + crawlLimit]
       if (isNotNullable(filters.page?.to) && filters.page?.to > 0) {
         const from = isNotNullable(filters.page?.from) && filters.page.from > 0 ? filters.page?.from : page.current.page
         if (filters.page?.to > from) return [filters.page?.to - from, from, filters.page?.to]
       }
       const limit = filters?.limit && filters.limit > 0 ? filters.limit : crawlLimit
-      return [limit, 1, 1 + limit]
+      return [limit, DEFAULT_FROM_PAGE, DEFAULT_FROM_PAGE + limit]
     }
     let [limit, from, to] = getCrawlLimit()
     const format = exportFormat || getFileExtension(exportOptions?.fileName ?? '')
