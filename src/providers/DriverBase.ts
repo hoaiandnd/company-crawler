@@ -1,7 +1,7 @@
 import pLimit from 'p-limit'
 
 import { CrawlResult, DriverComponent, ExportOptions } from '@/types/driver.js'
-import { getDomainFromUrl } from '@/utils/extractor.js'
+import { getDomainFromUrl, getFileExtension } from '@/utils/extractor.js'
 import { isNotNullable, waitRandom } from '@/utils/function.js'
 import { DriverContext } from '@/providers/DriverContext.js'
 import { ErrorMessage } from '@/constants/error.js'
@@ -54,7 +54,8 @@ export class DriverBase<TCrawlData extends { phone: string }, TFetchOptions = Re
       return filters?.limit && filters.limit > 0 ? filters.limit : crawlLimit
     }
     let limit = getCrawlLimit()
-    const format = exportFormat || 'txt'
+    const format = exportFormat || getFileExtension(exportOptions?.fileName ?? '')
+    if (!format) throw new Error(ErrorMessage.ERR_NO_EXPORT_FORMAT_PROVIDED)
     const exportedFileName = exportOptions?.fileName || `${crawlDomain}_${Date.now()}.${format.replace(/^\./, '')}`
     const exporter = exporters?.find(e => e.canHandle(format))
     while (limit >= 0) {

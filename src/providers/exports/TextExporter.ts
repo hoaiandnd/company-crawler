@@ -12,6 +12,7 @@ export class TextExporter implements IDriverExporter {
     return format === 'txt'
   }
   async export<T = any>(data: T[], options?: DriverExporterOptions<T>): Promise<void> {
+    console.log('TEXT EXPORTER RUNNING ...')
     const fileName = options?.fileName || Date.now()
     const text = data.map(item => {
       if (typeof item === 'object' && item !== null) {
@@ -23,7 +24,7 @@ export class TextExporter implements IDriverExporter {
     })
     const fullPath = path.join(__dirname, '..', '..', 'exporters', `${fileName}.txt`)
     await writeFile(fullPath, text.toString(), {
-      encoding: 'utf-8',
+      encoding: 'utf8',
       // mode: 0o777,
       flag: 'a'
     })

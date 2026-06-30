@@ -10,14 +10,12 @@ const createCrawlFilterRangeSchema = <T extends z.ZodTypeAny>(valueSchema: T) =>
 const CrawlFilterSchema = z.object({
   limit: z.number().int().positive().optional(),
   page: createCrawlFilterRangeSchema(z.number().int().positive()).optional(),
-  date: createCrawlFilterRangeSchema(
-    z.union([z.number().int().positive(), z.string()])
-  ).optional()
+  date: createCrawlFilterRangeSchema(z.union([z.number().int().positive(), z.string()])).optional()
 })
 
 export const CrawlRequestSchema = z.object({
   url: z.url(),
-  exportFormat: ExportFormatSchema.optional().default('xlsx'),
+  exportFormat: ExportFormatSchema.optional(),
   filters: CrawlFilterSchema.optional()
 })
 const OptionalString = z.string().optional().default('')
@@ -43,10 +41,7 @@ export const RuleSchema = z.object({
   ignoreCase: z.boolean().optional().default(false)
 })
 
-export const BlackListSchema = z.record(
-  CompanyDetailSchema.keyof(),
-  RuleSchema.optional()
-)
+export const BlackListSchema = z.record(CompanyDetailSchema.keyof(), RuleSchema.optional())
 
 export const DriverConfigSchema = z.object({
   name: z.string().optional().default(''),

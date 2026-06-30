@@ -14,6 +14,7 @@ export class ExcelExporter implements IDriverExporter {
   private _workbook?: ExcelJS.stream.xlsx.WorkbookWriter
   private _worksheet?: ExcelJS.Worksheet
   canHandle(format: string): boolean {
+    console.log('>>> ExcelExporter', format)
     return ['csv', 'xlsx'].includes(format)
   }
   protected ensureInitWorkbook<T>(filename: string, firstObject: T) {
@@ -30,18 +31,10 @@ export class ExcelExporter implements IDriverExporter {
     }
     return this._workbook
   }
-  async export<T = any>(
-    data: T[],
-    options?: DriverExporterOptions<T>
-  ): Promise<void> {
+  async export<T = any>(data: T[], options?: DriverExporterOptions<T>): Promise<void> {
+    console.log('EXCEL EXPORTER RUNNING ...')
     const fileName = options?.fileName || Date.now()
-    const fullPath = path.join(
-      __dirname,
-      '..',
-      '..',
-      'exporters',
-      `${fileName}`
-    )
+    const fullPath = path.join(__dirname, '..', '..', 'exporters', `${fileName}`)
     this.ensureInitWorkbook(fullPath, data[0])
     for (const row of data) {
       this._worksheet!.addRow(row).commit()
