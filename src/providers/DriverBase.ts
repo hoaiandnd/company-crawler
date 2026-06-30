@@ -85,9 +85,6 @@ export class DriverBase<TCrawlData extends { phone: string }, TFetchOptions = Re
         })
         transformedCompnanies.length = 0 // giải phóng bộ nhớ
       } else {
-        // companies.forEach(company =>
-        //   console.log(JSON.stringify(company) ?? 'NO PHONE')
-        // )
         console.log(`>> COMPANIES LENGTH: `, companies.length)
       }
       console.log(`\n>>> FINISH CRAWLING PAGE ${page.current.page}`)
