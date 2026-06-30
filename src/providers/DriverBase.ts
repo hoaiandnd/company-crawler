@@ -6,6 +6,10 @@ import { isNotNullable, waitRandom } from '@/utils/function.js'
 import { DriverContext } from '@/providers/DriverContext.js'
 import { ErrorMessage } from '@/constants/error.js'
 
+type LimitPage = number
+type FromPage = number | undefined
+type ToPage = number | undefined
+
 export class DriverBase<TCrawlData extends { phone: string }, TFetchOptions = RequestInit> {
   protected readonly _components: DriverComponent<TCrawlData, TFetchOptions>
   // chứa các thông tin sẽ được truyền cho các thành phần của driver
@@ -44,19 +48,23 @@ export class DriverBase<TCrawlData extends { phone: string }, TFetchOptions = Re
     }
     // load and save driver configurations
     let page = await paginator.paginate(this._context)
-    const getCrawlLimit = () => {
+    const getCrawlLimit = (): readonly [LimitPage, FromPage, ToPage] => {
       // trường hợp không có filter trên request thì lấy thông tin từ file cấu hình
-      if (!filters) return crawlLimit
+      if (!filters) return [crawlLimit, 1, 1 + crawlLimit]
       if (isNotNullable(filters.page?.to) && filters.page?.to > 0) {
         const from = isNotNullable(filters.page?.from) && filters.page.from > 0 ? filters.page?.from : page.current.page
-        if (filters.page?.to > from) return filters.page?.to - from
+        if (filters.page?.to > from) return [filters.page?.to - from, from, filters.page?.to]
       }
-      return filters?.limit && filters.limit > 0 ? filters.limit : crawlLimit
+      const limit = filters?.limit && filters.limit > 0 ? filters.limit : crawlLimit
+      return [limit, 1, 1 + limit]
     }
-    let limit = getCrawlLimit()
+    let [limit, from, to] = getCrawlLimit()
     const format = exportFormat || getFileExtension(exportOptions?.fileName ?? '')
+    // phải chỉ định format file (docx, txt, xlsx, ...), không thì dừng lại, không sử dụng giá trị mặc định
     if (!format) throw new Error(ErrorMessage.ERR_NO_EXPORT_FORMAT_PROVIDED)
-    const exportedFileName = exportOptions?.fileName || `${crawlDomain}_${Date.now()}.${format.replace(/^\./, '')}`
+
+    const exportedFileName =
+      exportOptions?.fileName || `${crawlDomain}_f${from}-t${to}-${Date.now()}.${format.replace(/^\./, '')}`
     const exporter = exporters?.find(e => e.canHandle(format))
     // có format nhưng lại không có exporter tương ứng hỗ trợ
     if (format && !exporter) {
