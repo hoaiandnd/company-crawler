@@ -18,15 +18,17 @@ export class TextExporter implements IDriverExporter {
       if (typeof item === 'object' && item !== null) {
         const objectKeys = Object.keys(item) as (keyof T)[]
         const values = objectKeys.map(key => item[key])
-        const line = values.join('\n')
+        const line = values.join(',')
         return line + '\n'
       }
+      return ''
     })
-    const fullPath = path.join(__dirname, '..', '..', 'exporters', `${fileName}.txt`)
-    await writeFile(fullPath, text.toString(), {
-      encoding: 'utf8',
+    const fullPath = path.join(__dirname, '..', '..', 'exporters', `${fileName}`)
+    console.log('TEXT EXPORTER LOG BUFFER', Buffer.isBuffer(text))
+    await writeFile(fullPath, text.join('\n'), {
+      encoding: 'utf8'
       // mode: 0o777,
-      flag: 'a'
+      // flag: 'a'
     })
   }
   close() {}
