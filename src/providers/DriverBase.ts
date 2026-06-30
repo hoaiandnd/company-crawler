@@ -8,8 +8,8 @@ import { ErrorMessage } from '@/constants/error.js'
 import { Defaults } from '@/constants/default.js'
 
 type LimitPage = number
-type FromPage = number | undefined
-type ToPage = number | undefined
+type FromPage = number
+type ToPage = number
 
 export class DriverBase<TCrawlData extends { phone: string }, TFetchOptions = RequestInit> {
   protected readonly _components: DriverComponent<TCrawlData, TFetchOptions>
@@ -52,12 +52,12 @@ export class DriverBase<TCrawlData extends { phone: string }, TFetchOptions = Re
     const getCrawlLimit = (): readonly [LimitPage, FromPage, ToPage] => {
       // trường hợp không có filter trên request thì lấy thông tin từ file cấu hình
       if (!filters) return [crawlLimit, Defaults.START_PAGE, Defaults.START_PAGE + crawlLimit]
-      if (isNotNullable(filters.page?.to) && filters.page?.to > 0) {
-        const from = isNotNullable(filters.page?.from) && filters.page.from > 0 ? filters.page?.from : page.current.page
-        if (filters.page?.to > from) return [filters.page?.to - from, from, filters.page?.to]
+      const from = isNotNullable(filters.page?.from) && filters.page.from > 0 ? filters.page?.from : page.current.page
+      if (isNotNullable(filters.page?.to) && filters.page?.to > from) {
+        return [filters.page?.to - from, from, filters.page?.to]
       }
       const limit = filters?.limit && filters.limit > 0 ? filters.limit : crawlLimit
-      return [limit, Defaults.START_PAGE, Defaults.START_PAGE + limit]
+      return [limit, from, from + limit]
     }
     let [limit, from, to] = getCrawlLimit()
     const format = exportFormat || getFileExtension(exportOptions?.fileName ?? '')
