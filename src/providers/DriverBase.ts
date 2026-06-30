@@ -58,6 +58,10 @@ export class DriverBase<TCrawlData extends { phone: string }, TFetchOptions = Re
     if (!format) throw new Error(ErrorMessage.ERR_NO_EXPORT_FORMAT_PROVIDED)
     const exportedFileName = exportOptions?.fileName || `${crawlDomain}_${Date.now()}.${format.replace(/^\./, '')}`
     const exporter = exporters?.find(e => e.canHandle(format))
+    // có format nhưng lại không có exporter tương ứng hỗ trợ
+    if (format && !exporter) {
+      console.log('NO SUPPORTED FORMAT FOR ', format.toUpperCase())
+    }
     while (limit >= 0) {
       console.log(`\n>>> START CRAWLING PAGE ${page.current.page}`)
       await waitRandom()
