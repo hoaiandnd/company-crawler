@@ -18,7 +18,7 @@ export class TextExporter implements IDriverExporter {
       if (typeof item === 'object' && item !== null) {
         const objectKeys = Object.keys(item) as (keyof T)[]
         const values = objectKeys.map(key => item[key])
-        const line = values.join(',')
+        const line = values.join('\n')
         return line + '\n'
       }
       return ''
