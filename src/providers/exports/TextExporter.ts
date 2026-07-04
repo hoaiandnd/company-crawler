@@ -8,7 +8,7 @@ export class TextExporter extends ExporterBase implements IDriverExporter {
   }
   async export<T = any>(data: T[], options?: DriverExporterOptions<T>): Promise<void> {
     console.log('TEXT EXPORTER RUNNING ...')
-    const fileName = options?.fileName || Date.now().toString()
+    const fileName = options?.fileName
     const text = data.map(item => {
       if (typeof item === 'object' && item !== null) {
         const objectKeys = Object.keys(item) as (keyof T)[]

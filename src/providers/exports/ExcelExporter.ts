@@ -1,20 +1,12 @@
+import { ErrorMessage } from '@/constants/error.js'
+import { ExporterBase } from '@/providers/exports/ExporterBase.js'
 import { DriverExporterOptions, IDriverExporter } from '@/types/driver.js'
 import ExcelJS from 'exceljs'
 
-// const workbook = new ExcelJS.Workbook()
-// const worksheet = workbook.addWorksheet('Danh sách')
-import path from 'path'
-
-import { fileURLToPath } from 'url'
-
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
-
-export class ExcelExporter implements IDriverExporter {
+export class ExcelExporter extends ExporterBase implements IDriverExporter {
   private _workbook?: ExcelJS.stream.xlsx.WorkbookWriter
   private _worksheet?: ExcelJS.Worksheet
   canHandle(format: string): boolean {
-    console.log('>>> ExcelExporter', format)
     return ['csv', 'xlsx'].includes(format)
   }
   protected ensureInitWorkbook<T>(filename: string, firstObject: T) {
@@ -33,8 +25,8 @@ export class ExcelExporter implements IDriverExporter {
   }
   async export<T = any>(data: T[], options?: DriverExporterOptions<T>): Promise<void> {
     console.log('EXCEL EXPORTER RUNNING ...')
-    const fileName = options?.fileName || Date.now()
-    const fullPath = path.join(__dirname, '..', '..', 'exporters', `${fileName}`)
+    const fileName = options?.fileName
+    const fullPath = this._getFileName(fileName)
     this.ensureInitWorkbook(fullPath, data[0])
     for (const row of data) {
       this._worksheet!.addRow(row).commit()
