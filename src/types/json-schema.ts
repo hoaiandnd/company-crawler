@@ -43,16 +43,31 @@ export const RuleSchema = z.object({
 
 export const BlackListSchema = z.record(CompanyDetailSchema.keyof(), RuleSchema.optional())
 
+export const TxtExportOptionsSchema = z.object({
+  propertyDelimiter: z.string().optional(),
+  itemDelimiter: z.string().optional()
+})
+export const ColumnHeadersMapSchema = z.record(CompanyDetailSchema.keyof(), z.string())
+export const XlsxExportOptionsSchema = z.object({
+  sheetName: z.string().optional()
+})
+export const ExporterOptionsSchema = z.object({
+  txt: TxtExportOptionsSchema.optional(),
+  xlsx: XlsxExportOptionsSchema.optional()
+})
+
 export const DriverConfigSchema = z.object({
   name: z.string().optional().default(''),
   domain: z.string(),
   dateFormat: z.string().default('YYYY-MM-DD'),
-  supportedExportFormats: z.array(z.string()),
+  supportedExportFormats: z.enum(['xlsx', 'txt']),
   crawlLimit: z.number().int().positive().default(10),
   concurrencyRequestLimit: z.number().int().positive().default(5),
   selectors: SelectorSchema.optional(),
   blackList: BlackListSchema.optional()
+  // exporterOptions: ExporterOptionsSchema.optional()
 })
+
 export const HopTacKinhDoanhResponseSchema = z.object({
   content: z
     .object({

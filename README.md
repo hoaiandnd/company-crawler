@@ -545,3 +545,23 @@ Do đó, các phương thức nếu gặp trường hợp ngoại lệ, hãy né
 Các lỗi bị ném ra từ các thành phần sẽ được xử lý tập trung tại phương thức `Driver._run()` mà không cần quan tâm đến lớp xử lý exception của hệ thống bên ngoài.
 
 Các ngoại lệ đều có tên bắt đầu bằng tiền tố `ERR_`.
+
+"exporterOptions": {
+    "txt": {
+      "propertyDelimiter": "\n",
+      "itemDelimiter": "\n"
+    },
+    "xlsx": {
+      "sheetName": "Sheet 1",
+      "columnHeadersMap": {
+        "name": "Tên công ty",
+        "phone": "Số điện thoại",
+        "taxCode": "Mã số thuế",
+        "address": "Địa chỉ",
+        "founder": "Chủ sở hữu",
+        "startDate": "Ngày thành lập",
+        "email": "Email",
+        "primaryBusiness": "Ngành nghề chính"
+      }
+    }
+  }

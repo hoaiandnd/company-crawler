@@ -88,10 +88,14 @@ export class DriverBase<TCrawlData extends { phone: string }, TFetchOptions = Re
             transformedCompnanies.push(transformFn(company))
           }
         }
-        await exporter.export(transformedCompnanies, {
-          ...exportOptions,
-          fileName: exportedFileName
-        })
+        await exporter.export(
+          transformedCompnanies,
+          {
+            ...exportOptions,
+            fileName: exportedFileName
+          },
+          this._context.driverConfig
+        )
         transformedCompnanies.length = 0 // giải phóng bộ nhớ
       } else {
         console.log(`>> COMPANIES LENGTH: `, companies.length)
