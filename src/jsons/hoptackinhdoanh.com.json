@@ -43,6 +43,25 @@
       "rules": ["vũng tàu", "bình dương"],
       "validateType": "includes",
       "ignoreCase": true
+    },
+    "exporterOptions": {
+      "txt": {
+        "propertyDelimiter": "\n",
+        "itemDelimiter": "\n"
+      },
+      "xlsx": {
+        "sheetName": "Sheet 1",
+        "columnHeadersMap": {
+          "name": "Tên công ty",
+          "phone": "Số điện thoại",
+          "taxCode": "Mã số thuế",
+          "address": "Địa chỉ",
+          "founder": "Chủ sở hữu",
+          "startDate": "Ngày thành lập",
+          "email": "Email",
+          "primaryBusiness": "Ngành nghề chính"
+        }
+      }
     }
   }
 }

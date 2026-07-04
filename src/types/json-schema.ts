@@ -47,9 +47,15 @@ export const TxtExportOptionsSchema = z.object({
   propertyDelimiter: z.string().optional(),
   itemDelimiter: z.string().optional()
 })
-export const ColumnHeadersMapSchema = z.record(CompanyDetailSchema.keyof(), z.string())
+
+const createPartialRecordSchema = <T extends z.ZodRawShape>(schema: z.ZodObject<T>) => {
+  const shape = Object.fromEntries(Object.keys(schema.shape).map(key => [key, z.string()]))
+  return z.object(shape).partial().strict()
+}
+export const ColumnHeadersMapSchema = createPartialRecordSchema(CompanyDetailSchema)
 export const XlsxExportOptionsSchema = z.object({
-  sheetName: z.string().optional()
+  sheetName: z.string().optional(),
+  columnHeadersMap: ColumnHeadersMapSchema.optional()
 })
 export const ExporterOptionsSchema = z.object({
   txt: TxtExportOptionsSchema.optional(),
@@ -64,8 +70,8 @@ export const DriverConfigSchema = z.object({
   crawlLimit: z.number().int().positive().default(10),
   concurrencyRequestLimit: z.number().int().positive().default(5),
   selectors: SelectorSchema.optional(),
-  blackList: BlackListSchema.optional()
-  // exporterOptions: ExporterOptionsSchema.optional()
+  blackList: BlackListSchema.optional(),
+  exporterOptions: ExporterOptionsSchema.optional()
 })
 
 export const HopTacKinhDoanhResponseSchema = z.object({
