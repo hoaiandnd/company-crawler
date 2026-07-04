@@ -1,5 +1,5 @@
 import { CrawlRequest } from '@/types/common.js'
-import { DriverConfigSchema } from '@/types/json-schema.js'
+import { DriverConfigSchema, ExporterOptionsSchema } from '@/types/json-schema.js'
 import z from 'zod'
 
 export type ValidRequestResult = {
@@ -87,10 +87,12 @@ export interface IDriverValidator<T> {
   validate(context: DriverContext, data: T): boolean | Promise<boolean>
 }
 
-export type DriverExporterOptions<T> = Omit<ExportOptions<T>, 'transformFn'>
+export type ExporterOptions<T> = Omit<ExportOptions<T>, 'transformFn'>
 export interface IDriverExporter {
   canHandle(format: string): boolean
-  export<T = any>(data: T[], options?: DriverExporterOptions<T>, config?: DriverConfig): void | Promise<void>
+  export<T = any>(data: T[], options?: ExporterOptions<T>, config?: DriverConfig): void | Promise<void>
   // một số trình ghi file phải có thao tác đóng luồng hoặc tương tự, hãy định nghĩa trong phương thức `close()`.
   close(): void | Promise<void>
 }
+
+export type DriverExporterOptions = z.infer<typeof ExporterOptionsSchema>

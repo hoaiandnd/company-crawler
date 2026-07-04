@@ -1,15 +1,15 @@
 import { ExporterBase } from '@/providers/exports/ExporterBase.js'
-import { DriverConfig, DriverExporterOptions, IDriverExporter } from '@/types/driver.js'
+import { DriverConfig, ExporterOptions, IDriverExporter } from '@/types/driver.js'
 import { writeFile } from 'node:fs/promises'
 
-export class TextExporter extends ExporterBase implements IDriverExporter {
-  // constructor(driverConfig: DriverConfig) {
-  //   super(driverConfig)
-  // }
+export class TextExporter extends ExporterBase<'txt'> implements IDriverExporter {
+  constructor() {
+    super('txt')
+  }
   canHandle(format: string): boolean {
     return format === 'txt'
   }
-  async export<T = any>(data: T[], options?: DriverExporterOptions<T>, configs?: DriverConfig): Promise<void> {
+  async export<T = any>(data: T[], options?: ExporterOptions<T>, configs?: DriverConfig): Promise<void> {
     console.log('TEXT EXPORTER RUNNING ...')
     const fileName = options?.fileName
     const txtExportOptions = configs?.exporterOptions?.['txt']

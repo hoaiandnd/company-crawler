@@ -1,13 +1,17 @@
-import { ErrorMessage } from '@/constants/error.js'
 import { ExporterBase } from '@/providers/exports/ExporterBase.js'
-import { DriverExporterOptions, IDriverExporter } from '@/types/driver.js'
+import { ExporterOptions, IDriverExporter } from '@/types/driver.js'
 import ExcelJS from 'exceljs'
 
-export class ExcelExporter extends ExporterBase implements IDriverExporter {
+export class ExcelExporter extends ExporterBase<'xlsx'> implements IDriverExporter {
   private _workbook?: ExcelJS.stream.xlsx.WorkbookWriter
   private _worksheet?: ExcelJS.Worksheet
+  constructor() {
+    super('xlsx')
+    this._workbook = undefined
+    this._worksheet = undefined
+  }
   canHandle(format: string): boolean {
-    return ['xlsx'].includes(format)
+    return format === 'xlsx'
   }
   protected ensureInitWorkbook<T>(filename: string, firstObject: T) {
     if (!this._workbook) {
@@ -23,7 +27,7 @@ export class ExcelExporter extends ExporterBase implements IDriverExporter {
     }
     return this._workbook
   }
-  async export<T = any>(data: T[], options?: DriverExporterOptions<T>): Promise<void> {
+  async export<T = any>(data: T[], options?: ExporterOptions<T>): Promise<void> {
     console.log('EXCEL EXPORTER RUNNING ...')
     const fileName = options?.fileName
     const fullPath = this._getFileName(fileName)
