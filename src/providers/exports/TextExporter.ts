@@ -24,7 +24,7 @@ export class TextExporter implements IDriverExporter {
       return ''
     })
     const fullPath = path.join(__dirname, '..', '..', 'exporters', `${fileName}`)
-    console.log('TEXT EXPORTER LOG BUFFER', Buffer.isBuffer(text))
+    
     writeFile(fullPath, text.join('\n'), {
       encoding: 'utf8',
       // mode: 0o777,
