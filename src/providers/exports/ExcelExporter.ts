@@ -1,5 +1,5 @@
 import { ExporterBase } from '@/providers/exports/ExporterBase.js'
-import { ExporterOptions, IDriverExporter } from '@/types/driver.js'
+import { DriverConfig, ExporterOptions, IDriverExporter } from '@/types/driver.js'
 import ExcelJS from 'exceljs'
 
 export class ExcelExporter extends ExporterBase<'xlsx'> implements IDriverExporter {
@@ -13,25 +13,27 @@ export class ExcelExporter extends ExporterBase<'xlsx'> implements IDriverExport
   canHandle(format: string): boolean {
     return format === 'xlsx'
   }
-  protected ensureInitWorkbook<T>(filename: string, firstObject: T) {
+  protected ensureInitWorkbook<T>(filename: string, firstObject: T, configs?: DriverConfig) {
     if (!this._workbook) {
+      const excelExportOptions = this._getExporterOptions(configs)
       this._workbook = new ExcelJS.stream.xlsx.WorkbookWriter({ filename })
       this._worksheet = this._workbook.addWorksheet('Data')
       if (typeof firstObject === 'object' && firstObject !== null) {
         const keys = Object.keys(firstObject)
         this._worksheet.columns = keys.map(key => ({
-          header: key,
+          header: excelExportOptions?.columnHeadersMap?.[key] || key,
           key
         }))
       }
     }
     return this._workbook
   }
-  async export<T = any>(data: T[], options?: ExporterOptions<T>): Promise<void> {
+  async export<T = any>(data: T[], options?: ExporterOptions<T>, configs?: DriverConfig): Promise<void> {
     console.log('EXCEL EXPORTER RUNNING ...')
     const fileName = options?.fileName
     const fullPath = this._getFileName(fileName)
-    this.ensureInitWorkbook(fullPath, data[0])
+
+    this.ensureInitWorkbook(fullPath, data[0], configs)
     for (const row of data) {
       this._worksheet!.addRow(row).commit()
     }

@@ -10,8 +10,8 @@ const __dirname = path.dirname(__filename)
 
 export abstract class ExporterBase<TExporterOptionsKey extends keyof DriverExporterOptions> {
   constructor(protected _exporterOptionsKey: TExporterOptionsKey) {}
-  protected getExporterOptions(driverConfig: DriverConfig) {
-    return driverConfig.exporterOptions?.[this._exporterOptionsKey]
+  protected _getExporterOptions(driverConfig: Nullable<DriverConfig>) {
+    return driverConfig?.exporterOptions?.[this._exporterOptionsKey]
   }
   protected _getFileName(fileName: Nullable<string>): string {
     if (!fileName) throw new Error(ErrorMessage.ERR_NO_FILE_NAME)
