@@ -60,7 +60,7 @@ export const DriverConfigSchema = z.object({
   name: z.string().optional().default(''),
   domain: z.string(),
   dateFormat: z.string().default('YYYY-MM-DD'),
-  supportedExportFormats: z.enum(['xlsx', 'txt']),
+  supportedExportFormats: z.array(z.string()).optional(),
   crawlLimit: z.number().int().positive().default(10),
   concurrencyRequestLimit: z.number().int().positive().default(5),
   selectors: SelectorSchema.optional(),
