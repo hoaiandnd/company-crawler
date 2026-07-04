@@ -19,3 +19,4 @@ import z from 'zod'
 export type CrawlRequest = z.infer<typeof CrawlRequestSchema>
 export type CompanyDetail = z.infer<typeof CompanyDetailSchema>
 export type MayBeAsync<T> = T | Promise<T>
+export type Nullable<T> = T | null | undefined

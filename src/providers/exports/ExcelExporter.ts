@@ -7,7 +7,7 @@ export class ExcelExporter extends ExporterBase implements IDriverExporter {
   private _workbook?: ExcelJS.stream.xlsx.WorkbookWriter
   private _worksheet?: ExcelJS.Worksheet
   canHandle(format: string): boolean {
-    return ['csv', 'xlsx'].includes(format)
+    return ['xlsx'].includes(format)
   }
   protected ensureInitWorkbook<T>(filename: string, firstObject: T) {
     if (!this._workbook) {
