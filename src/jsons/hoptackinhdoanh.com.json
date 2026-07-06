@@ -40,7 +40,7 @@
       "ignoreCase": true
     },
     "address": {
-      "rules": ["vũng tàu", "bình dương"],
+      "rules": ["vũng tàu"],
       "validateType": "includes",
       "ignoreCase": true
     }
