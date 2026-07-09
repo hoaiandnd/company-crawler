@@ -565,3 +565,9 @@ Các ngoại lệ đều có tên bắt đầu bằng tiền tố `ERR_`.
       }
     }
   }
+
+  "address": {
+      "rules": ["vũng tàu","xuân lộc", "vĩnh cửu", "tân phú", "bình phước", "cẩm mỹ", "long khánh", "long thành", "nhơn trạch"],
+      "validateType": "includes",
+      "ignoreCase": true
+    }
