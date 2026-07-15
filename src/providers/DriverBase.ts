@@ -6,6 +6,7 @@ import { isNotNullable, waitRandom } from '@/utils/function.js'
 import { DriverContext } from '@/providers/DriverContext.js'
 import { ErrorMessage } from '@/constants/error.js'
 import { Defaults } from '@/constants/default.js'
+import { slugifyUrl } from '@/utils/builder.js'
 
 type LimitPage = number
 type FromPage = number
@@ -65,7 +66,7 @@ export class DriverBase<TCrawlData extends { phone: string }, TFetchOptions = Re
     if (!format) throw new Error(ErrorMessage.ERR_NO_EXPORT_FORMAT_PROVIDED)
 
     const exportedFileName =
-      exportOptions?.fileName || `${crawlDomain}_f${from}-t${to}-${Date.now()}.${format.replace(/^\./, '')}`
+      exportOptions?.fileName || `${slugifyUrl(url)}_f${from}-t${to}-${Date.now()}.${format.replace(/^\./, '')}`
     const exporter = exporters?.find(e => e.canHandle(format))
     // có format nhưng lại không có exporter tương ứng hỗ trợ
     if (format && !exporter) {

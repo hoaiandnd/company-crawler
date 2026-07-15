@@ -32,3 +32,24 @@ export function selectAllExcept<TKey extends keyof CompanyDetail>(...keys: reado
     >
   }
 }
+
+export function slugifyUrl(url: string) {
+  try {
+    const u = new URL(url)
+
+    const hostname = u.hostname.replace(/\./g, '_')
+    const pathname = u.pathname.replace(/\//g, '_')
+    const search = u.search.replace(/[?&=]/g, '_')
+
+    return `${hostname}${pathname}${search}`
+      .replace(/[^a-zA-Z0-9_]/g, '_')
+      .replace(/_+/g, '_')
+      .replace(/^_|_$/g, '')
+  } catch {
+    // fallback nếu không phải URL hợp lệ
+    return url
+      .replace(/[^a-zA-Z0-9]/g, '_')
+      .replace(/_+/g, '_')
+      .replace(/^_|_$/g, '')
+  }
+}

@@ -53,13 +53,9 @@ export type PaginationInfo = {
 export type PaginationResult = {
   current: PaginationInfo // trang hiện tại - dùng trực tiếp để fetch
   next: PaginationInfo // trang tiếp theo - dùng khi kết thúc fetch
-  // goNext: () =>
-  //   | { current: PaginationInfo; next: PaginationInfo }
-  //   | Promise<{ current: PaginationInfo; next: PaginationInfo }> // thay đổi `current` và `next` của object hiện tại
 }
 
 export type DriverComponent<TCrawlData, TFetchOptions> = {
-  // configLoader: IDriverConfigurationLoader
   paginator: IDriverPaginator
   fetcher: IDriverFetcher<TFetchOptions>
   crawler: IDriverCrawler<TCrawlData>
