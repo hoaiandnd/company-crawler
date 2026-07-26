@@ -32,7 +32,6 @@ export class ExcelExporter extends ExporterBase<'xlsx'> implements IDriverExport
     console.log('EXCEL EXPORTER RUNNING ...')
     const fileName = options?.fileName
     const fullPath = this._getFileName(fileName)
-
     this.ensureInitWorkbook(fullPath, data[0], configs)
     for (const row of data) {
       this._worksheet!.addRow(row).commit()

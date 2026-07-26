@@ -64,9 +64,8 @@ export class DriverBase<TCrawlData extends { phone: string }, TFetchOptions = Re
     const format = exportFormat || getFileExtension(exportOptions?.fileName ?? '')
     // phải chỉ định format file (docx, txt, xlsx, ...), không thì dừng lại, không sử dụng giá trị mặc định
     if (!format) throw new Error(ErrorMessage.ERR_NO_EXPORT_FORMAT_PROVIDED)
-
-    const exportedFileName =
-      exportOptions?.fileName || `${slugifyUrl(url)}_f${from}-t${to}-${Date.now()}.${format.replace(/^\./, '')}`
+    const extension = format.replace(/^\./, '')
+    const exportedFileName = exportOptions?.fileName || `${slugifyUrl(url)}_f${from}-t${to}-${Date.now()}.${extension}`
     const exporter = exporters?.find(e => e.canHandle(format))
     // có format nhưng lại không có exporter tương ứng hỗ trợ
     if (format && !exporter) {
