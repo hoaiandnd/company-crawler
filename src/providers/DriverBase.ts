@@ -72,7 +72,6 @@ export class DriverBase<TCrawlData extends { phone: string }, TFetchOptions = Re
       console.log(`>>> FORMAT ${format.toUpperCase()} IS NOT SUPPORTED`)
     }
     while (limit >= 0) {
-      console.log(`\n>>> START CRAWLING PAGE ${page.current.page}`)
       await waitRandom()
       const html = await fetcher.fetch(page.current.url.toString())
       // console.log(JSON.parse(html))
@@ -98,9 +97,8 @@ export class DriverBase<TCrawlData extends { phone: string }, TFetchOptions = Re
         )
         transformedCompnanies.length = 0 // giải phóng bộ nhớ
       } else {
-        console.log(`>> COMPANIES LENGTH: `, companies.length)
-      }
-      console.log(`\n>>> FINISH CRAWLING PAGE ${page.current.page}`)
+        console.log(`Exporter Not found`)
+      }0
       companies.length = 0 // giải phóng bộ nhớ cho mảng sau khi xuất dữ liệu
       page = await paginator.goNext(page)
       limit--
