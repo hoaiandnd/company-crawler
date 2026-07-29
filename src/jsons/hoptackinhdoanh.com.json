@@ -38,8 +38,12 @@
       "rules": ["02"],
       "validateType": "startsWith",
       "ignoreCase": true
+    },
+    "address": {
+      "rules": ["vũng tàu", "xuân lộc", "vĩnh cửu", "tân phú", "bình phước", "cẩm mỹ", "thống nhất", "nhơn trạch"],
+      "validateType": "includes",
+      "ignoreCase": true
     }
-    
   },
   "exporterOptions": {
     "txt": {
