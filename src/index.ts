@@ -30,7 +30,7 @@ app.post('/', async (req: Request, res: Response) => {
       driverContext
     )
     const { isFinish, lastPage } = await driver._run({
-      transformFn: select('name', 'phone', 'address', 'startDate')
+      transformFn: select('name', 'founder', 'phone', 'address')
     })
     console.log(isFinish ? 'CRAWL FINISH' : `LAST PAGE: ${lastPage}`)
     res.status(200).json({ message: 'CRAWL_SUCCESS' })
@@ -40,7 +40,9 @@ app.post('/', async (req: Request, res: Response) => {
     })
   }
 })
-
+app.post('/infocom-vs-tracuu-masothue', () => {
+  
+})
 app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`)
 })

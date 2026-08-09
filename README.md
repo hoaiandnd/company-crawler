@@ -513,9 +513,9 @@ Phương thức `canHandle()` dùng để xác định export driver nào có th
 
 ```ts
 const exporter = this._components.exporters.find(e => e.canHandle('.docx'))
-if(!exporter) {
+if (!exporter) {
   throw new Error('ERR_FORMAT_CANNOT_HANDLE')
-  return  
+  return
 }
 await exporter.export(data)
 // code ...
@@ -544,30 +544,4 @@ Do đó, các phương thức nếu gặp trường hợp ngoại lệ, hãy né
 
 Các lỗi bị ném ra từ các thành phần sẽ được xử lý tập trung tại phương thức `Driver._run()` mà không cần quan tâm đến lớp xử lý exception của hệ thống bên ngoài.
 
-Các ngoại lệ đều có tên bắt đầu bằng tiền tố `ERR_`.
-
-"exporterOptions": {
-    "txt": {
-      "propertyDelimiter": "\n",
-      "itemDelimiter": "\n"
-    },
-    "xlsx": {
-      "sheetName": "Sheet 1",
-      "columnHeadersMap": {
-        "name": "Tên công ty",
-        "phone": "Số điện thoại",
-        "taxCode": "Mã số thuế",
-        "address": "Địa chỉ",
-        "founder": "Chủ sở hữu",
-        "startDate": "Ngày thành lập",
-        "email": "Email",
-        "primaryBusiness": "Ngành nghề chính"
-      }
-    }
-  }
-
-  "address": {
-      "rules": ["vũng tàu","xuân lộc", "vĩnh cửu", "tân phú", "bình phước", "cẩm mỹ", "thống nhất", "nhơn trạch"],
-      "validateType": "includes",
-      "ignoreCase": true
-    }
+Các ngoại lệ đều có tên bắt đầu bằng tiền tố `ERR_`

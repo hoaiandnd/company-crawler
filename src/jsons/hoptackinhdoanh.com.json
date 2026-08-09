@@ -20,17 +20,7 @@
   },
   "blackList": {
     "name": {
-      "rules": [
-        "chi nhánh",
-        "văn phòng đại diện",
-        "Ủy ban",
-        "ubnd",
-        "công an",
-        "massage",
-        "ntnn",
-        "nộp hộ",
-        "phần mềm"
-      ],
+      "rules": ["chi nhánh", "văn phòng đại diện", "Ủy ban", "ubnd", "công an", "massage", "ntnn", "nộp hộ", "phần mềm"],
       "validateType": "includes",
       "ignoreCase": true
     },
@@ -40,7 +30,7 @@
       "ignoreCase": true
     },
     "address": {
-      "rules": ["vũng tàu", "xuân lộc", "vĩnh cửu", "tân phú", "bình phước", "cẩm mỹ", "thống nhất", "nhơn trạch"],
+      "rules": ["bình dương", "vũng tàu"],
       "validateType": "includes",
       "ignoreCase": true
     }
