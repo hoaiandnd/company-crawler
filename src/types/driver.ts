@@ -1,4 +1,4 @@
-import { CrawlRequest } from '@/types/common.js'
+import { CrawlRequest, MayBeAsync } from '@/types/common.js'
 import { DriverConfigSchema, ExporterOptionsSchema } from '@/types/json-schema.js'
 import z from 'zod'
 
@@ -92,3 +92,21 @@ export interface IDriverExporter {
 }
 
 export type DriverExporterOptions = z.infer<typeof ExporterOptionsSchema>
+export type NavigatorOptions<TOptions> = {
+  url: string
+  options?: TOptions
+}
+export interface IDriverNavigator<TSourceCrawlData, TFetchOptions = RequestInit> {
+  getFetchOptions(src: TSourceCrawlData): MayBeAsync<NavigatorOptions<TFetchOptions>>
+}
+
+// Combined driver
+export type CombinedSourceDriverComponent<TCrawlData, TFetchOptions> = Omit<DriverComponent<TCrawlData, TFetchOptions>, 'crawler'> & {
+  sourceCrawler: IDriverCrawler<TCrawlData>
+  targetCrawler: IDriverCrawler<TCrawlData>
+  navigator: IDriverNavigator<TFetchOptions>
+}
+
+export type LimitPage = number
+export type FromPage = number
+export type ToPage = number

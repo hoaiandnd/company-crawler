@@ -1,4 +1,8 @@
+import { Defaults } from '@/constants/default.js'
 import { ErrorMessage } from '@/constants/error.js'
+import { DriverContext } from '@/providers/DriverContext.js'
+import { FromPage, LimitPage, PaginationResult, ToPage } from '@/types/driver.js'
+import { isNotNullable } from '@/utils/function.js'
 import { CheerioAPI } from 'cheerio'
 
 export const getDomainFromUrl = (url: string) => {
@@ -14,11 +18,7 @@ export const toTextMap = <TObject extends object, TKey extends keyof TObject>($:
     }
   }
 }
-export const toObjectMap = <TObject extends object, TKey extends keyof TObject>(
-  $: CheerioAPI,
-  obj: TObject,
-  ...keys: TKey[]
-) => {
+export const toObjectMap = <TObject extends object, TKey extends keyof TObject>($: CheerioAPI, obj: TObject, ...keys: TKey[]) => {
   const textMap = toTextMap($, obj)
   return keys.reduce(
     (acc, key) => {
@@ -51,4 +51,15 @@ export function getFileExtension(filename: string): string {
   }
 
   return baseName.slice(lastDotIndex + 1).toLowerCase()
+}
+
+export const getCrawlLimit = (crawlLimit: number, page: PaginationResult, filters?: DriverContext['crawlRequest']['filters']): readonly [LimitPage, FromPage, ToPage] => {
+  // trường hợp không có filter trên request thì lấy thông tin từ file cấu hình
+  if (!filters) return [crawlLimit, Defaults.START_PAGE, Defaults.START_PAGE + crawlLimit]
+  const from = isNotNullable(filters.page?.from) && filters.page.from > 0 ? filters.page?.from : page.current.page
+  if (isNotNullable(filters.page?.to) && filters.page?.to > from) {
+    return [filters.page?.to - from, from, filters.page?.to]
+  }
+  const limit = filters?.limit && filters.limit > 0 ? filters.limit : crawlLimit
+  return [limit, from, from + limit]
 }

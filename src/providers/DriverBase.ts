@@ -1,16 +1,12 @@
 import pLimit from 'p-limit'
 
-import { CrawlResult, DriverComponent, ExportOptions } from '@/types/driver.js'
-import { getDomainFromUrl, getFileExtension } from '@/utils/extractor.js'
+import { CrawlResult, DriverComponent, ExportOptions, FromPage, LimitPage, ToPage } from '@/types/driver.js'
+import { getCrawlLimit, getDomainFromUrl, getFileExtension } from '@/utils/extractor.js'
 import { isNotNullable, waitRandom } from '@/utils/function.js'
 import { DriverContext } from '@/providers/DriverContext.js'
 import { ErrorMessage } from '@/constants/error.js'
 import { Defaults } from '@/constants/default.js'
 import { slugifyUrl } from '@/utils/builder.js'
-
-type LimitPage = number
-type FromPage = number
-type ToPage = number
 
 export class DriverBase<TCrawlData extends { phone: string }, TFetchOptions = RequestInit> {
   protected readonly _components: DriverComponent<TCrawlData, TFetchOptions>
@@ -50,17 +46,17 @@ export class DriverBase<TCrawlData extends { phone: string }, TFetchOptions = Re
     }
     // load and save driver configurations
     let page = await paginator.paginate(this._context)
-    const getCrawlLimit = (): readonly [LimitPage, FromPage, ToPage] => {
-      // trường hợp không có filter trên request thì lấy thông tin từ file cấu hình
-      if (!filters) return [crawlLimit, Defaults.START_PAGE, Defaults.START_PAGE + crawlLimit]
-      const from = isNotNullable(filters.page?.from) && filters.page.from > 0 ? filters.page?.from : page.current.page
-      if (isNotNullable(filters.page?.to) && filters.page?.to > from) {
-        return [filters.page?.to - from, from, filters.page?.to]
-      }
-      const limit = filters?.limit && filters.limit > 0 ? filters.limit : crawlLimit
-      return [limit, from, from + limit]
-    }
-    let [limit, from, to] = getCrawlLimit()
+    // const getCrawlLimit = (): readonly [LimitPage, FromPage, ToPage] => {
+    //   // trường hợp không có filter trên request thì lấy thông tin từ file cấu hình
+    //   if (!filters) return [crawlLimit, Defaults.START_PAGE, Defaults.START_PAGE + crawlLimit]
+    //   const from = isNotNullable(filters.page?.from) && filters.page.from > 0 ? filters.page?.from : page.current.page
+    //   if (isNotNullable(filters.page?.to) && filters.page?.to > from) {
+    //     return [filters.page?.to - from, from, filters.page?.to]
+    //   }
+    //   const limit = filters?.limit && filters.limit > 0 ? filters.limit : crawlLimit
+    //   return [limit, from, from + limit]
+    // }
+    let [limit, from, to] = getCrawlLimit(crawlLimit, page, filters)
     const format = exportFormat || getFileExtension(exportOptions?.fileName ?? '')
     // phải chỉ định format file (docx, txt, xlsx, ...), không thì dừng lại, không sử dụng giá trị mặc định
     if (!format) throw new Error(ErrorMessage.ERR_NO_EXPORT_FORMAT_PROVIDED)
@@ -98,7 +94,8 @@ export class DriverBase<TCrawlData extends { phone: string }, TFetchOptions = Re
         transformedCompnanies.length = 0 // giải phóng bộ nhớ
       } else {
         console.log(`Exporter Not found`)
-      }0
+      }
+      0
       companies.length = 0 // giải phóng bộ nhớ cho mảng sau khi xuất dữ liệu
       page = await paginator.goNext(page)
       limit--
