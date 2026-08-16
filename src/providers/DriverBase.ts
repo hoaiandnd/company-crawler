@@ -1,11 +1,10 @@
 import pLimit from 'p-limit'
 
-import { CrawlResult, DriverComponent, ExportOptions, FromPage, LimitPage, ToPage } from '@/types/driver.js'
+import { CrawlResult, DriverComponent, ExportOptions } from '@/types/driver.js'
 import { getCrawlLimit, getDomainFromUrl, getFileExtension } from '@/utils/extractor.js'
-import { isNotNullable, waitRandom } from '@/utils/function.js'
+import { waitRandom } from '@/utils/function.js'
 import { DriverContext } from '@/providers/DriverContext.js'
 import { ErrorMessage } from '@/constants/error.js'
-import { Defaults } from '@/constants/default.js'
 import { slugifyUrl } from '@/utils/builder.js'
 
 export class DriverBase<TCrawlData extends { phone: string }, TFetchOptions = RequestInit> {
@@ -95,7 +94,6 @@ export class DriverBase<TCrawlData extends { phone: string }, TFetchOptions = Re
       } else {
         console.log(`Exporter Not found`)
       }
-      0
       companies.length = 0 // giải phóng bộ nhớ cho mảng sau khi xuất dữ liệu
       page = await paginator.goNext(page)
       limit--
