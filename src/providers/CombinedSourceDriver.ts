@@ -5,11 +5,11 @@ import { CombinedSourceDriverComponent, CrawlResult, ExportOptions, FromPage, Li
 import { getCrawlLimit, getDomainFromUrl } from '@/utils/extractor.js'
 import { isNotNullable } from '@/utils/function.js'
 
-export class CombinedSourceDriver<TCrawlData, TFetchOptions> {
-  protected readonly _components: CombinedSourceDriverComponent<TCrawlData, TFetchOptions>
+export class CombinedSourceDriver<TsourceCrawlData, TCrawlData, TFetchOptions = RequestInit> {
+  protected readonly _components: CombinedSourceDriverComponent<TsourceCrawlData, TCrawlData, TFetchOptions>
   protected readonly _context: DriverContext
 
-  constructor(components: CombinedSourceDriverComponent<TCrawlData, TFetchOptions>, context: DriverContext) {
+  constructor(components: CombinedSourceDriverComponent<TsourceCrawlData, TCrawlData, TFetchOptions>, context: DriverContext) {
     this._components = components
     this._context = context
   }

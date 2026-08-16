@@ -99,12 +99,21 @@ export type NavigatorOptions<TOptions> = {
 export interface IDriverNavigator<TSourceCrawlData, TFetchOptions = RequestInit> {
   getFetchOptions(src: TSourceCrawlData): MayBeAsync<NavigatorOptions<TFetchOptions>>
 }
-
+export interface ISourceDriverCrawler<TSourceCrawlData> {
+  crawls(html: string, config: DriverConfig): MayBeAsync<TSourceCrawlData[]>
+}
+export interface ITargetDriverCrawler<TTargetCrawlData> {
+  crawl(html: string, config: DriverConfig): MayBeAsync<TTargetCrawlData>
+}
 // Combined driver
-export type CombinedSourceDriverComponent<TCrawlData, TFetchOptions> = Omit<DriverComponent<TCrawlData, TFetchOptions>, 'crawler'> & {
-  sourceCrawler: IDriverCrawler<TCrawlData>
-  targetCrawler: IDriverCrawler<TCrawlData>
-  navigator: IDriverNavigator<TFetchOptions>
+/**
+ * Type for the component that combines source and target crawling logic
+ * `TSourceCrawlData` is the type of data crawled from the source pages, used for navigator to determine the next fetch options.
+ */
+export type CombinedSourceDriverComponent<TSourceCrawlData, TCrawlData, TFetchOptions> = Omit<DriverComponent<TCrawlData, TFetchOptions>, 'crawler'> & {
+  sourceCrawler: ISourceDriverCrawler<TSourceCrawlData>
+  targetCrawler: ITargetDriverCrawler<TCrawlData>
+  navigator: IDriverNavigator<TSourceCrawlData, TFetchOptions>
 }
 
 export type LimitPage = number
