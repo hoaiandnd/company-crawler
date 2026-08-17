@@ -10,7 +10,7 @@
     "companyDetail": {
       "name": ".companyDetailHeader h1",
       "phone": ".companyPhoneReveal",
-      "taxCode": ".companyDetail-info-value.taxCode-highlight",
+      "taxCode": "body > main > div.container.mx-auto.px-4.my-5 > div > main > div > div.mt-2.flex.flex-row.gap-4 > div > ul > li:nth-child(2) > span",
       "address": "div.companyDetailContent > div.companyDetail-info-grid > div:nth-child(2) > div:nth-child(3) > span.companyDetail-info-value",
       "founder": "div.companyDetailContent > div.companyDetail-info-grid > div:nth-child(2) > div:nth-child(2) > span.companyDetail-info-value > strong",
       "startDate": "div.companyDetailContent > div.companyDetail-info-grid > div:nth-child(1) > div:nth-child(5) > span.companyDetail-info-value",
