@@ -6,7 +6,7 @@
   "concurrencyRequestLimit": 5,
   "dateFormat": "DD/MM/YYYY",
   "selectors": {
-    "companyLinks": "div.companyPage-business-list-item-code > h3",
+    "companyLinks": "",
     "companyDetail": {
       "name": ".companyDetailHeader h1",
       "phone": ".companyPhoneReveal",
