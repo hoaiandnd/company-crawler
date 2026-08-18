@@ -63,3 +63,8 @@ export const getCrawlLimit = (crawlLimit: number, page: PaginationResult, filter
   const limit = filters?.limit && filters.limit > 0 ? filters.limit : crawlLimit
   return [limit, from, from + limit]
 }
+export function splitPair(value: string): readonly [string, string] {
+  const [first = '', second = ''] = (value ?? '').split('|')
+
+  return [first, second]
+}
