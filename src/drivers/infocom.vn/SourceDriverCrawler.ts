@@ -2,7 +2,7 @@ import { MayBeAsync } from '@/types/common.js'
 import { DriverConfig, ISourceDriverCrawler } from '@/types/driver.js'
 import * as cheerio from 'cheerio'
 
-export class DriverCrawler implements ISourceDriverCrawler<string> {
+export class SourceDriverCrawler implements ISourceDriverCrawler<string> {
   crawls(html: string, config: DriverConfig): MayBeAsync<string[]> {
     const { selectors } = config
     if (!selectors) return []
