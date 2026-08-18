@@ -34,15 +34,16 @@ export class CombinedSourceDriver<TSourceCrawlData, TCrawlData, TFetchOptions = 
     if (format && !exporter) {
       console.log(`>>> FORMAT ${format.toUpperCase()} IS NOT SUPPORTED`)
     }
+    const traCuuMaSoThueWaitTime = 6
     while (limit >= 0) {
       // code
-      await sleep(5 * 1000)
+      await sleep(traCuuMaSoThueWaitTime * 1000)
       const html = await fetcher.fetch(page.current.url.toString())
       // lấy danh sách các dữ liệu nguồn từ trang hiện tại và gửi cho navigator
       const sourceDataList = await sourceCrawler.crawls(html, this._context.driverConfig)
       const companies: TCrawlData[] = []
       for (const sourceData of sourceDataList) {
-        await sleep(5 * 1000)
+        await sleep(traCuuMaSoThueWaitTime * 1000)
         const { url: targetUrl, options } = await navigator.getFetchOptions(sourceData)
         const targetHtml = await fetcher.fetch(targetUrl, options)
         const targetData = await targetCrawler.crawl(targetHtml, this._context.driverConfig)
