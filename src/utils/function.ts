@@ -6,6 +6,6 @@ export const isNotNullable = <T>(value: T | undefined | null): value is NonNulla
   return value !== undefined && value !== null
 }
 export const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
-export const isNotEmptyArray = <T>(array?: T[]) => {
-  return Array.isArray(array) && array.length > 0
+export const isEmptyArray = <T>(array?: T[]) => {
+  return !Array.isArray(array) || array.length <= 0
 }

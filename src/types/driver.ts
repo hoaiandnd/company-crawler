@@ -97,7 +97,7 @@ export type NavigatorOptions<TOptions> = {
   options?: TOptions
 }
 export interface IDriverNavigator<TSourceCrawlData, TFetchOptions = RequestInit> {
-  getFetchOptions(src: TSourceCrawlData): MayBeAsync<NavigatorOptions<TFetchOptions>>
+  getFetchOptions(src: TSourceCrawlData, crawlRequest: CrawlRequest): MayBeAsync<NavigatorOptions<TFetchOptions>>
 }
 export interface ISourceDriverCrawler<TSourceCrawlData> {
   crawls(html: string, config: DriverConfig): MayBeAsync<TSourceCrawlData[]>

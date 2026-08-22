@@ -12,11 +12,12 @@ const CrawlFilterSchema = z.object({
   page: createCrawlFilterRangeSchema(z.number().int().positive()).optional(),
   date: createCrawlFilterRangeSchema(z.union([z.number().int().positive(), z.string()])).optional()
 })
-
+const StringOrArrayStringSchema = z.union([z.string(), z.array(z.string())])
 export const CrawlRequestSchema = z.object({
   url: z.url(),
   exportFormat: ExportFormatSchema.optional(),
-  filters: CrawlFilterSchema.optional()
+  filters: CrawlFilterSchema.optional(),
+  tokens: StringOrArrayStringSchema.optional()
 })
 const OptionalString = z.string().optional().default('')
 export const CompanyDetailSchema = z.object({
