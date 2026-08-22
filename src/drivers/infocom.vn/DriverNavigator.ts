@@ -5,8 +5,7 @@ import { isEmptyArray } from '@/utils/function.js'
 
 export class DriverNavigator implements IDriverNavigator<string> {
   getFetchOptions(src: string, crawlRequest: CrawlRequest): MayBeAsync<NavigatorOptions<RequestInit>> {
-    // request url: https://tracuu-masothue.com/tracuu.php?name=0601329078&token=7ba14c434345fc8e626f17a8c56ab8c95d04620617ca03cb642983e2b0a496b6
-    // const url = `https://tracuu-masothue.com/tracuu.php`
+    // url mẫu: https://tracuu-masothue.com/tracuu.php?name=0601329078&token=7ba14c434345fc8e626f17a8c56ab8c95d04620617ca03cb642983e2b0a496b6
     const urlObj = new URL(`https://tracuu-masothue.com/tracuu.php`)
     urlObj.searchParams.append('name', src)
     const token = typeof crawlRequest.tokens === 'string' ? crawlRequest.tokens : crawlRequest.tokens?.[0]

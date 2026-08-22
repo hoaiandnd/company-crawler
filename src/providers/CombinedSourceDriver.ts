@@ -44,7 +44,7 @@ export class CombinedSourceDriver<TSourceCrawlData, TCrawlData, TFetchOptions = 
       const companies: TCrawlData[] = []
       for (const sourceData of sourceDataList) {
         await sleep(traCuuMaSoThueWaitTime * 1000)
-        const { url: targetUrl, options } = await navigator.getFetchOptions(sourceData)
+        const { url: targetUrl, options } = await navigator.getFetchOptions(sourceData, this._context.crawlRequest)
         const targetHtml = await fetcher.fetch(targetUrl, options)
         const targetData = await targetCrawler.crawl(targetHtml, this._context.driverConfig)
         companies.push(targetData)
